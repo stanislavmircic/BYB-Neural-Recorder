@@ -1,6 +1,6 @@
 #include "widgets/Application.h"
 #include "Game.h"
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include <cstring>
 #include <string>
 

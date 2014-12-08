@@ -6,7 +6,7 @@
 #include "ScrollBar.h"
 #include "Application.h"
 
-#include <SDL_opengl.h>
+#include <SDL/SDL_opengl.h>
 #include <iostream>
 #include <cstdio>
 

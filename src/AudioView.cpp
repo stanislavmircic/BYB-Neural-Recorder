@@ -1,6 +1,6 @@
 #include "AudioView.h"
-#include <SDL.h>
-#include <SDL_opengl.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_opengl.h>
 #include "widgets/Painter.h"
 #include "widgets/TextureGL.h"
 #include "widgets/BitmapFontGL.h"

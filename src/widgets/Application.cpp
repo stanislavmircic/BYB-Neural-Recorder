@@ -3,8 +3,8 @@
 #include "LayoutItem.h"
 #include "BitmapFontGL.h"
 #include "Color.h"
-#include <SDL.h>
-#include <SDL_opengl.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_opengl.h>
 #include <iostream>
 #include <cstdlib>
 #include <bass.h>

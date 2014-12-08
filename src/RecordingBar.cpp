@@ -1,5 +1,5 @@
 #include "RecordingBar.h"
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include "widgets/Painter.h"
 #include "widgets/BitmapFontGL.h"
 #include "widgets/Application.h"

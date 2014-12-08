@@ -2,7 +2,7 @@
 #define BACKYARDBRAINS_WIDGETS_EVENT_H
 
 #include "Point.h"
-#include <SDL_keysym.h>
+#include <SDL/SDL_keysym.h>
 
 namespace BackyardBrains {
 

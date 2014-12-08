@@ -1,7 +1,7 @@
 #include "Game.h"
 #include "MainView.h"
 #include "widgets/TextureGL.h"
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include <iostream>
 
 namespace BackyardBrains {

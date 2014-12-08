@@ -1,7 +1,7 @@
 #ifndef BACKYARDBRAINS_WIDGETS_LOADTEXTURE_H
 #define BACKYARDBRAINS_WIDGETS_LOADTEXTURE_H
 
-#include <SDL_opengl.h>
+#include <SDL/SDL_opengl.h>
 
 namespace BackyardBrains {
 
