@@ -16,7 +16,8 @@ Game::Game() : _fileRec(_manager) {
 	setWindowTitle("BYB Spike Recorder");
 
 	std::cout << "Starting GUI...\n";
-
+    //_arduinoSerial.openPort();
+    //timerSerial = 0;
 }
 
 Game::~Game() {
@@ -57,11 +58,26 @@ void Game::loadResources() {
 
 	Widgets::TextureGL::load("data/ckboxon.png");
 	Widgets::TextureGL::load("data/ckboxoff.png");
+    
+    Widgets::TextureGL::load("data/disconnected.png");
+    Widgets::TextureGL::load("data/connected.png");
 }
 
 void Game::advance() {
 	static uint32_t t = 0; // TODO make this cleaner
 	uint32_t newt = SDL_GetTicks();
+   /* int buffer[3024];
+    
+    if(timerSerial++ == 10)
+    {
+        int numberOfSamples = _arduinoSerial.readPort(buffer);
+        std::cout<<"New buffer -------------------\n";
+        for(int g=0;g<numberOfSamples;g++)
+        {
+            std::cout << buffer[g] << "\n";
+        }
+        timerSerial = 0;
+    }*/
 	_manager.advance((newt-t)*_manager.sampleRate()/(1000-100)); // fetch more samples than necessary to prevent lag
 	_fileRec.advance();
 

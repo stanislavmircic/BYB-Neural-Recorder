@@ -12,8 +12,9 @@ namespace BackyardBrains {
 static const int SLICE_W = 45;
 static const int SLICE_H = 30;
 
-ColorDropDownList::ColorDropDownList(Widget *parent) : Widget(parent), _selection(0) {
+ColorDropDownList::ColorDropDownList(Widget *parent) : Widget(parent), _selection(0), _disabled(false) {
 	setSizeHint(Widgets::Size(SLICE_W+15,SLICE_H));
+    
 }
 
 const std::vector<Widgets::Color> &ColorDropDownList::content() const {
@@ -41,30 +42,51 @@ void ColorDropDownList::paintEvent() {
 	if(_content.size() > 0)
 		Widgets::Painter::setColor(_content[_selection]);
 
-	Widgets::Painter::drawRect(Widgets::Rect(2,2,SLICE_W-4, height()-4));
+    if(!_disabled)
+    {
+        Widgets::Painter::drawRect(Widgets::Rect(2,2,SLICE_W-4, height()-4));
 
-	Widgets::TextureGL::get("data/dropdown.png")->bind();
-	Widgets::Painter::setColor(Widgets::Colors::button);
-	Widgets::Painter::drawTexRect(Widgets::Rect(SLICE_W+2,height()/2-3,width()-SLICE_W-6, 6));
-	glBindTexture(GL_TEXTURE_2D, 0);
+        Widgets::TextureGL::get("data/dropdown.png")->bind();
+        Widgets::Painter::setColor(Widgets::Colors::button);
+        Widgets::Painter::drawTexRect(Widgets::Rect(SLICE_W+2,height()/2-3,width()-SLICE_W-6, 6));
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 
 }
 
 void ColorDropDownList::mousePressEvent(Widgets::MouseEvent *event) {
-	if(event->button() == Widgets::LeftButton) {
-		event->accept();
+    if(!_disabled)
+    {
+        if(event->button() == Widgets::LeftButton) {
+            event->accept();
 
-		ColorDropDownPopup *popup = new ColorDropDownPopup(_content);
-		popup->selectionChanged.connect(this, &ColorDropDownList::setSelection);
-		popup->setGeometry(Widgets::Rect(mapToGlobal(rect().bottomLeft()), Widgets::Size(width(), 120)));
-		Widgets::Application::getInstance()->addPopup(popup);
-	} else if(event->button() == Widgets::WheelUpButton) {
-		setSelection(_selection-1);
-		event->accept();
-	} else if(event->button() == Widgets::WheelDownButton) {
-		setSelection(_selection+1);
-		event->accept();
-	}
+            ColorDropDownPopup *popup = new ColorDropDownPopup(_content);
+            popup->selectionChanged.connect(this, &ColorDropDownList::setSelection);
+            popup->setGeometry(Widgets::Rect(mapToGlobal(rect().bottomLeft()), Widgets::Size(width(), 120)));
+            Widgets::Application::getInstance()->addPopup(popup);
+        } else if(event->button() == Widgets::WheelUpButton) {
+            setSelection(_selection-1);
+            event->accept();
+        } else if(event->button() == Widgets::WheelDownButton) {
+            setSelection(_selection+1);
+            event->accept();
+        }
+    }
+    else
+    {
+        event->accept();
+    }
+}
+    
+    
+void ColorDropDownList::setDisabled(bool newValue)
+{
+    _disabled = newValue;
+}
+    
+bool ColorDropDownList::disabled()
+{
+    return _disabled;
 }
 
 ColorDropDownPopup::ColorDropDownPopup(const std::vector<Widgets::Color> &content, Widget *parent)

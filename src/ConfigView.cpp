@@ -7,6 +7,7 @@
 #include "widgets/TextureGL.h"
 #include "widgets/Application.h"
 #include "widgets/BitmapFontGL.h"
+#include "DropDownList.h"
 #include "widgets/Label.h"
 #include "AudioView.h"
 #include "ColorDropDownList.h"
@@ -74,8 +75,71 @@ ConfigView::ConfigView(RecordingManager &mngr, AudioView &audioView, Widget *par
 	}
 
 	for(int i = 0; i < audioView.channelCount(); i++)
+    {
 		clrs[audioView.channelVirtualDevice(i)]->setSelection(audioView.channelColor(i));
+    }
 
+    
+    //Serial  config widgets
+    
+    Widgets::Label *name2 = new Widgets::Label(group);
+    name2->setText("Select port:");
+    name2->updateSize();
+    gvbox->addSpacing(0);
+    gvbox->addWidget(name2, Widgets::AlignLeft);
+    
+    
+    
+    //Dropdown for select port
+    Widgets::BoxLayout *serialHbox = new Widgets::BoxLayout(Widgets::Horizontal);
+    serialPortWidget = new DropDownList(group);
+    serialPortWidget->clear();
+    std::list<std::string> sps =  _manager.serailPortsList();
+    std::list<std::string>::iterator it;
+    for(it = sps.begin();it!=sps.end();it++)
+    {
+        serialPortWidget->addItem(it->c_str());
+    }
+    serialPortWidget->setSelection(_manager.serialPortIndex());
+    _catchers.push_back(SignalCatcher(_catchers.size(), this));
+    serialPortWidget->indexChanged.connect(&_catchers[_catchers.size()-1], &SignalCatcher::catchPort);
+    serialPortWidget->setDisabled(_manager.serialMode());
+    
+    serialHbox->addWidget(serialPortWidget);
+    serialHbox->addSpacing(5);
+
+    
+    
+    
+    
+    
+    //Button for connect
+    std::cout<<"now serial button connect: \n";
+    _connectButton = new Widgets::PushButton(group);
+    _connectButton->clicked.connect(this, &ConfigView::connectPressed);
+    if(_manager.serialMode())
+    {
+            std::cout<<"Connected button \n";
+        _connectButton->setNormalTex(Widgets::TextureGL::get("data/connected.png"));
+        _connectButton->setHoverTex(Widgets::TextureGL::get("data/connected.png"));
+    }
+    else
+    {
+            std::cout<<"not connected button \n";
+        _connectButton->setNormalTex(Widgets::TextureGL::get("data/disconnected.png"));
+        _connectButton->setHoverTex(Widgets::TextureGL::get("data/disconnected.png"));
+    }
+    _connectButton->setSizeHint(Widgets::Size(26,26));
+    serialHbox->addWidget(_connectButton);
+    serialHbox->update();
+    gvbox->addSpacing(3);
+    gvbox->addLayout(serialHbox);
+    
+    
+    
+    
+    
+    
 	gvbox->update();
 
 	Widgets::BoxLayout *vbox = new Widgets::BoxLayout(Widgets::Vertical, this);
@@ -88,6 +152,10 @@ ConfigView::ConfigView(RecordingManager &mngr, AudioView &audioView, Widget *par
 	vbox->addLayout(hbox);
 	vbox->addSpacing(20);
 	vbox->addWidget(group, Widgets::AlignCenter);
+    
+    
+    
+    
 
 	vbox->update();
 
@@ -99,6 +167,37 @@ void ConfigView::paintEvent() {
 	Widgets::Painter::setColor(bg);
 	Widgets::Painter::drawRect(rect());
 	
+}
+    
+//
+// Connect/dsconnect from serial port
+//
+void ConfigView::connectPressed()
+{
+    if(_manager.serialMode())
+    {
+        _manager.disconnectFromSerial();
+    }
+    else
+    {
+        if(!_manager.initSerial(serialPortWidget->item(serialPortWidget->selection()).c_str()))
+        {
+            std::cout<<"Can't init serial port. \n";
+        
+        }
+    }
+    if(_manager.serialMode())
+    {
+        _connectButton->setNormalTex(Widgets::TextureGL::get("data/connected.png"));
+        _connectButton->setHoverTex(Widgets::TextureGL::get("data/connected.png"));
+        close();
+    }
+    else
+    {
+        _connectButton->setNormalTex(Widgets::TextureGL::get("data/disconnected.png"));
+        _connectButton->setHoverTex(Widgets::TextureGL::get("data/disconnected.png"));
+    }
+    serialPortWidget->setDisabled(_manager.serialMode());
 }
 
 void ConfigView::closePressed() {
@@ -115,6 +214,12 @@ void ConfigView::mutePressed() {
 	}
 }
 
+void ConfigView::serialPortChanged(int virtualDevice, int portidx)
+{
+    _manager.changeSerialPort(portidx);
+}
+    
+    
 void ConfigView::colorChanged(int virtualDevice, int coloridx) {
 	int channel = _audioView.virtualDeviceChannel(virtualDevice);
 	if(channel < 0 && coloridx != 0) {

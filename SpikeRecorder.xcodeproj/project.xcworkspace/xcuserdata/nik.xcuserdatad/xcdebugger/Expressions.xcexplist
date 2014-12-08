@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "BackyardBrains::SampleBuffer::addData(short const*, long long):SampleBuffer.h">
+         <PersistentStrings>
+            <PersistentString
+               value = "_devices">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "BackyardBrains::RecordingManager::advanceSerialMode(unsigned int):RecordingManager.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "BackyardBrains::SampleBuffer::getData(short*, long long, long long) const [inlined]:SampleBuffer.h">
+         <PersistentStrings>
+            <PersistentString
+               value = "dst">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>

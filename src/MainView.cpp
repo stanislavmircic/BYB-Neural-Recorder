@@ -7,7 +7,6 @@
 #include "widgets/FileDialog.h"
 #include "widgets/Label.h"
 #include "widgets/ErrorBox.h"
-#include "widgets/ToolTip.h"
 #include "engine/SpikeSorter.h"
 #include "engine/FileRecorder.h"
 #include "Paths.h"
@@ -275,7 +274,7 @@ void MainView::filePressed() {
 		std::stringstream s;
 		s << "Error: Failed to open '" << d.getResultFilename().c_str() << "'. Wrong format perhaps?";
 		Widgets::ErrorBox *box = new Widgets::ErrorBox(s.str().c_str());
-		box->setGeometry(Widgets::Rect(width()/2-200, height()/2-40, 400, 80));
+		box->setGeometry(Widgets::Rect(this->width()/2-200, this->height()/2-40, 400, 80));
 		Widgets::Application::getInstance()->addPopup(box);
 		return;
 	}
@@ -292,17 +291,12 @@ void MainView::filePressed() {
 	_analysisButton->setVisible(true);
 	delete _anaView;
 	_anaView = NULL;
-
-	Widgets::ToolTip *tip = new Widgets::ToolTip("Click to return to live mode \x1f", 2000);
-	tip->setGeometry(Widgets::Rect(width()/2-190, height()-150, 280, 40));
-	tip->setMouseTracking(false);
-	Widgets::Application::getInstance()->addPopup(tip);
 }
 
 void MainView::configPressed() {
 	ConfigView *c = new ConfigView(_manager, *_audioView);
 	c->setDeleteOnClose(true);
-	c->setGeometry(rect());
+	c->setGeometry(this->rect());
 	Widgets::Application::getInstance()->addWindow(c);
 }
 
@@ -311,7 +305,7 @@ void MainView::analysisPressed() {
 		_anaView = new AnalysisView(_manager);
 	
 	_anaView->setDeleteOnClose(false);
-	_anaView->setGeometry(rect());
+	_anaView->setGeometry(this->rect());
 	Widgets::Application::getInstance()->addWindow(_anaView);
 
 	if(!_manager.paused())

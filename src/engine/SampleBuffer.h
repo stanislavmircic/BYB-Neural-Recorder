@@ -80,9 +80,28 @@ public:
 		}
 		_pos += len;
 	}
+    
+    void simpleAddData(const int16_t *src, int64_t len)
+    {
+        if (len > 0)
+            _notEmpty = true;
+        for (int i = 0; i < len; i++)
+        {
+            _buffer[_head++] = *src++;
+            if (_head == SIZE)
+                _head = 0;
+        }
+       // std::cout<< "**Pos: "<< _pos <<" Len: "" \n";
+        _pos += len;
+    }
+    
+    
+    
+    
 	void getData(int16_t *dst, int64_t offset, int64_t len) const
 	{
 		int64_t j = 0;
+         //std::cout<< "Offset: "<<offset<<" Len: "<<len << "Pos: "<< _pos <<" \n";
 		for (int64_t i = offset - _pos; i < (offset - _pos + len); i++, j++)
 		{
 			if (i < -SIZE || (i >= 0))
@@ -91,6 +110,11 @@ public:
 				dst[j] = _buffer[(_head + i + SIZE)%SIZE];
 		}
 	}
+    
+    
+    
+    
+    
 	void getDataEnvelope(std::pair<int16_t, int16_t> *dst, int64_t offset, int64_t len, int skip) const
 	{
 		// qDebug() << "SampleBuffer: CALLING getDataEnvelope(<dst>," << offset << "," << len << "," << skip << ") w/ force =" << force;

@@ -8,27 +8,19 @@ namespace FileDialogMac {
 
 
 FileDialog::DialogState openFileDialog(std::string *fn, FileDialog::DialogType type) {
-	NSURL *url;
-	NSString *str;
+	NSPanel *panel;
 	if(type == FileDialog::SaveFile) {
-		NSPanel *panel = [NSSavePanel savePanel];
-
-		NSInteger res = [panel runModal];
-		if (res == NSFileHandlingPanelCancelButton)
-			return FileDialog::CANCELED;
-
-		url = [panel URL];
+		panel = [NSSavePanel savePanel];
 	} else {
-		NSPanel *panel = [NSOpenPanel openPanel];
-
-		NSInteger res = [panel runModal];
-		if (res == NSFileHandlingPanelCancelButton)
-			return FileDialog::CANCELED;
-
-		url = [panel URL];
+		panel = [NSOpenPanel openPanel];
 	}
 
-	str = [url path];
+	NSInteger res = [panel runModal];
+	if (res == NSFileHandlingPanelCancelButton)
+		return FileDialog::CANCELED;
+
+	NSURL *url = [panel URL];
+	NSString *str = [url path];
 	fn->assign([str UTF8String]);
 	return FileDialog::SUCCESS;
 }

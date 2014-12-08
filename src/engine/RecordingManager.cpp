@@ -16,8 +16,16 @@ RecordingManager::RecordingManager() : _pos(0), _paused(false), _threshMode(fals
 		std::cerr << "Bass Error: Initialization failed: " << BASS_ErrorGetCode() << "\n";
 		exit(1);
 	}
-
+    
 	_player.start(_sampleRate);
+    
+    _arduinoSerial.getAllPortsList();
+    std::list<std::string>::iterator list_it;
+    for(list_it = _arduinoSerial.list.begin(); list_it!= _arduinoSerial.list.end(); list_it++)
+    {
+            std::cout<<list_it->c_str()<<"\n";
+    }
+
 	initRecordingDevices();
 }
 
@@ -104,6 +112,103 @@ void RecordingManager::clear() {
 	_selectedVDevice = 0;
 }
 
+bool RecordingManager::initSerial(const char *portName)
+{
+    
+    
+    if(_arduinoSerial.openPort(portName) == -1)
+    {
+        _serialMode = false;
+        return false;
+    }
+    
+    
+   
+       
+       
+    DWORD frequency = 10000;
+    HSTREAM stream = BASS_StreamCreate(frequency, 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, NULL);
+    if(stream == 0) {
+        std::cerr << "Bass Error: Failed to open serial stream. \n";
+        return false;
+    }
+    
+    clear();
+    BASS_CHANNELINFO info;
+    BASS_ChannelGetInfo(stream, &info);
+    
+    
+    
+    int bytespersample = info.origres/8;
+   /* if(bytespersample == 0)
+    {
+        std::cerr << "Bass Error: Error init serial stream. \n";
+        return false;
+    }*/
+   
+    bytespersample = 4; // bass converts everything it doesn’t support.
+    setSampleRate(info.freq);
+    _devices[0].create(_pos, info.chans);
+    _devices[0].bytespersample = bytespersample;
+    
+    _recordingDevices.resize(info.chans);
+    for(unsigned int i = 0; i < info.chans; i++) {
+        VirtualDevice &virtualDevice = _recordingDevices[i];
+        
+        virtualDevice.enabled = true;
+        virtualDevice.device = 0;
+        virtualDevice.channel = i;
+        virtualDevice.name = "Serial Channel";
+        virtualDevice.threshold = 100;
+        virtualDevice.bound = 0;
+    }
+    _devices[0].handle = stream;
+    _fileMode = false;
+    _serialMode = true;
+    deviceReload.emit();
+    _player.setVolume(0);
+
+    return true;
+}
+    
+    
+void RecordingManager::changeSerialPort(int portIndex)
+{
+    //std::cout<<"Change serial port to: "<<portIndex<<"\n";
+    _serialPortIndex = portIndex;
+}
+    
+int RecordingManager::serialPortIndex()
+{
+   return std::max(0, std::min(_serialPortIndex,(int)(_arduinoSerial.list.size()-1)));
+}
+    
+void RecordingManager::disconnectFromSerial()
+{
+    _arduinoSerial.closeSerial();
+    initRecordingDevices();
+}
+    
+void RecordingManager::advanceSerialMode(uint32_t samples)
+{
+    int16_t tempSerialBuffer[1024];
+    int numberOfSamples = _arduinoSerial.readPort(tempSerialBuffer);
+    if(numberOfSamples!=-1)
+    {
+        _devices.begin()->second.sampleBuffers[0]->simpleAddData((const int16_t *)&tempSerialBuffer[0], numberOfSamples);
+        _pos += numberOfSamples;
+    }
+    /* std::cout<<"Results ---\n";
+     for(int g=0;g<numberOfSamples;g++)
+     {
+     std::cout << tempSerialBuffer[g] << "\n";
+     }
+     
+     */
+}
+    
+    
+    
 bool RecordingManager::loadFile(const char *filename) {
 	HSTREAM stream = BASS_StreamCreateFile(false, filename, 0, 0, BASS_STREAM_DECODE);
 	if(stream == 0) {
@@ -111,7 +216,7 @@ bool RecordingManager::loadFile(const char *filename) {
 		return false;
 	}
 
-
+	clear();
 	BASS_CHANNELINFO info;
 	BASS_ChannelGetInfo(stream, &info);
 
@@ -120,8 +225,6 @@ bool RecordingManager::loadFile(const char *filename) {
 		return false;
 	if(bytespersample >= 3)
 		bytespersample = 4; // bass converts everything it doesn’t support.
-
-	clear();
 	setSampleRate(info.freq);
 	_devices[0].create(_pos, info.chans);
 	_devices[0].bytespersample = bytespersample;
@@ -158,7 +261,7 @@ void RecordingManager::initRecordingDevices() {
 
 	clear();
 	_fileMode = false;
-
+    _serialMode = false;
 
 	for (int i = 0; BASS_RecordGetDeviceInfo(i, &info); i++)
 	{
@@ -310,6 +413,9 @@ std::vector<std::pair<int16_t,int16_t> > RecordingManager::getTriggerSamplesEnve
 	return result;
 }
 
+    
+
+    
 void RecordingManager::advanceFileMode(uint32_t samples) {
 	if(!_paused && _pos >= fileLength()-1) {
 		pauseChanged.emit();
@@ -367,7 +473,9 @@ void RecordingManager::advanceFileMode(uint32_t samples) {
 			for(DWORD i = 0; i < samplesRead/channum; i++) {
 				channels[chan][i] -= dcBias;
 			}
-
+            
+            
+//Here we add data to sample buffer!!!!!!
 			it->second.sampleBuffers[chan]->addData(channels[chan].data(), samplesRead/channum);
 		}
 
@@ -413,6 +521,13 @@ void RecordingManager::advanceFileMode(uint32_t samples) {
 }
 
 void RecordingManager::advance(uint32_t samples) {
+    
+    if(_serialMode)
+    {
+        advanceSerialMode(samples);
+        return;
+    }
+    
 	if(_fileMode) {
 		advanceFileMode(samples);
 		return;
@@ -480,6 +595,7 @@ void RecordingManager::advance(uint32_t samples) {
 			if(it->second.sampleBuffers[0]->empty()) {
 				it->second.sampleBuffers[chan]->setPos(oldPos);
 			}
+//Here we add data to Sample buffer !!!!!
 			it->second.sampleBuffers[chan]->addData(channels[chan].data(), samplesRead/channum);
 		}
 		const int64_t posA = it->second.sampleBuffers[0]->pos();

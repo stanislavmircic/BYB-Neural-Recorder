@@ -16,13 +16,13 @@ OBJECTS = \
 	src/engine/RecordingManager.o \
 	src/engine/FileRecorder.o \
 	src/engine/Player.o \
+    src/engine/ArduinoSerial.o \
 	src/engine/SpikeSorter.o \
 	src/widgets/LayoutItem.o \
 	src/widgets/BoxLayout.o \
 	src/widgets/Widget.o \
 	src/widgets/Painter.o \
 	src/widgets/PushButton.o \
-	src/widgets/DropDownList.o \
 	src/widgets/ScrollBar.o \
 	src/widgets/Application.o \
 	src/widgets/BitmapFontGL.o \
@@ -30,7 +30,6 @@ OBJECTS = \
 	src/widgets/LoadTexture.o \
 	src/widgets/Label.o \
 	src/widgets/ErrorBox.o \
-	src/widgets/ToolTip.o \
 	src/Game.o \
 	src/main.o \
 	src/MainView.o \
@@ -39,6 +38,7 @@ OBJECTS = \
 	src/AnalysisView.o \
 	src/AnalysisAudioView.o \
 	src/RecordingBar.o \
+	src/DropDownList.o \
 	src/ColorDropDownList.o
 
 OBJECTS_WIN = \
@@ -73,10 +73,10 @@ ifeq ($(OS),MacOSX)
 
 	OBJCFILES = support/SDLMain.m src/widgets/native/FileDialogMac.mm
 
-	LIBS = -Wl,-rpath,@executable_path/../Frameworks libbass.dylib $(OBJCFILES) -F. -framework SDL -framework Cocoa -framework SDL_image -framework OpenGL -framework GLUT
+LIBS = -Wl,-rpath,@executable_path/../Frameworks libbass.dylib $(OBJCFILES) -F. -framework SDL -framework Cocoa -framework SDL_image -framework OpenGL -framework GLUT -framework IOKit
 
 	FWPATH = /Library/Frameworks
-
+	CFLAGS += -I$(FWPATH)/SDL.framework/Headers -I$(FWPATH)/SDL_image.framework/Headers
 	ifneq ($(FRAMEWORK_PATH),)
 		FWPATH = $(FRAMEWORK_PATH)
 		CFLAGS += -I$(FRAMEWORK_PATH)/SDL.framework/Headers -I$(FRAMEWORK_PATH)/SDL_image.framework/Headers # for Mac OS X
@@ -90,7 +90,7 @@ else
 
 	ifeq ($(OS),Linux)
 		OBJECTS += $(OBJECTS_LINUX)
-		LIBS = `sdl-config --libs` -lSDL_image -lGL -lGLU -lbass -lpthread # for Linux
+		LIBS = `sdl-config --libs` -lSDL_image -lGL -lGLU -lbass -lserial # for Linux
 	else
 
 

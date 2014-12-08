@@ -46,7 +46,7 @@ const float AudioView::ampScale = .0005f;
 
 AudioView::AudioView(Widgets::Widget *parent, RecordingManager &mngr)
 	: Widgets::Widget(parent), _manager(mngr), _clickedGain(-1), _clickedSlider(-1), _clickedPixelOffset(0),
-	_clickedThresh(false), _rulerClicked(false), _rulerStart(-1.f), _rulerEnd(-1.f), _channelOffset(0), _timeScale(0.1f)  {
+	_clickedThresh(false), _rulerClicked(false), _rulerStart(-1), _rulerEnd(-1), _channelOffset(0), _timeScale(0.1f)  {
 }
 
 AudioView::~AudioView() {
@@ -255,7 +255,7 @@ static const char *get_unit_str(int unit) {
 
 void AudioView::drawScale() {
 	int unit = -std::log(_timeScale)/std::log(10);
-	float shownscalew = scaleWidth()/std::pow(10.f, (float)unit);
+	float shownscalew = scaleWidth()/std::pow(10, unit);
 	std::stringstream o;
 	o << pow(10,-unit%3) << ' ';
 	o << get_unit_str(unit/3);
@@ -274,7 +274,7 @@ void AudioView::drawData(std::vector<std::pair<int16_t, int16_t> > &data, int ch
 	glBegin(GL_LINE_STRIP);
 	for(int j = 0; j < (int)data.size(); j++) {
 		int xc = j*dist+x;
-
+       // std::cout<<"X: "<<-data[j].first*_channels[channel].gain*scale+y<<"Y: "<<-data[j].second*_channels[channel].gain*scale+y<<"\n";
 		glVertex3i(xc, -data[j].first*_channels[channel].gain*scale+y, 0);
 		glVertex3i(xc, -data[j].second*_channels[channel].gain*scale+y, 0);
 	}
@@ -342,6 +342,7 @@ static float calculateRMS(std::vector<std::pair<int16_t, int16_t> > &data, unsig
 	float sum = 0.f;
 
 	assert(startsample < data.size() && endsample < data.size());
+
 	for(unsigned int i = startsample; i < endsample; i++) {
 		sum += data[i].first*data[i].first;
 		sum += data[i].second*data[i].second;
@@ -380,10 +381,33 @@ void AudioView::drawAudio() {
 			std::vector<std::pair<int16_t, int16_t> > data;
 
 			if(!_manager.threshMode()) {
-				int pos = _manager.pos()+_channelOffset-samples;
-				if(_manager.fileMode())
-					pos += samples/2;
-				data = _manager.getSamplesEnvelope(_channels[i].virtualDevice, pos, samples, screenw == 0 ? 1 : std::max(samples/screenw,1));
+                if(_manager.serialMode())
+                {
+                    int pos = _manager.pos()-samples;
+                    int16_t tempData[samples];
+                    std::vector< std::pair<int16_t, int16_t> > tempVectorData(samples);
+                    _manager.getData(_channels[i].virtualDevice, pos, samples, tempData);
+                   // std::cout<<"Samples:" << samples;
+                    for(int ind = 0;ind<samples;ind++)
+                    {
+                        //std::pair<int16_t, int16_t> bounding(0, 0);
+                       // std::cout<< tempData[ind] <<" \n";
+
+                        tempVectorData[ind].first = tempData[ind];
+                        tempVectorData[ind].second = tempData[ind];
+                    }
+                    data = tempVectorData;
+                }
+                else
+                {
+                    int pos = _manager.pos()+_channelOffset-samples;
+                    if(_manager.fileMode())
+                    {
+                        pos += samples/2;
+                    }
+                    data = _manager.getSamplesEnvelope(_channels[i].virtualDevice, pos, samples, screenw == 0 ? 1 : std::max(samples/screenw,1));
+                }
+				
 			} else {
 				data = _manager.getTriggerSamplesEnvelope(_channels[i].virtualDevice, samples, screenw == 0 ? 1 : std::max(samples/screenw,1));
 			}
@@ -395,8 +419,8 @@ void AudioView::drawAudio() {
 			glBindTexture(GL_TEXTURE_2D, 0);
 
 			if(_rulerClicked) {
-				int startsample = std::min(_rulerStart, _rulerEnd)*data.size();
-				int endsample = std::max(_rulerStart, _rulerEnd)*data.size();
+				int startsample = (std::min(_rulerStart, _rulerEnd)-MOVEPIN_SIZE*1.5f)*data.size()/screenw;
+				int endsample = (std::max(_rulerStart, _rulerEnd)-MOVEPIN_SIZE*1.5f)*data.size()/screenw;
 
 				float rms = calculateRMS(data, startsample, endsample);
 
@@ -417,11 +441,11 @@ void AudioView::drawAudio() {
 
 void AudioView::drawRulerBox() {
 	if(_rulerClicked) {
-		int x = std::min(_rulerEnd, _rulerStart)*screenWidth();
-		int w = std::max(_rulerEnd, _rulerStart)*screenWidth() - x;
+		int x = std::min(_rulerEnd, _rulerStart);
+		int w = std::max(_rulerEnd, _rulerStart) - x;
 
 		Widgets::Painter::setColor(Widgets::Color(50,50,50));
-		Widgets::Painter::drawRect(Widgets::Rect(x+MOVEPIN_SIZE*1.5f, -100, w, height()+200));
+		Widgets::Painter::drawRect(Widgets::Rect(x, -100, w, height()+200));
 	}
 }
 
@@ -430,19 +454,19 @@ void AudioView::drawRulerTime() {
 	const int samples = sampleCount(screenw, scaleWidth());
 
 	if(_rulerClicked) {
-		float w = fabs(_rulerStart-_rulerEnd);
-		float dtime = w*samples/_manager.sampleRate();
+		int w = abs(_rulerStart-_rulerEnd);
+		float dtime = w/(float)screenw*samples/_manager.sampleRate();
 		int unit = -std::log(dtime/100)/std::log(1000);
 		unit = std::max(0, unit);
-		dtime *= std::pow(1000.f, (float)unit);
+		dtime *= std::pow(1000, unit);
 		std::stringstream s;
 		s.precision(3);
 		s << std::fixed << dtime << " " << get_unit_str(unit);
 
 		Widgets::Painter::setColor(Widgets::Color(50,50,50,200));
-		drawtextbgbox(s.str(), (_rulerStart+_rulerEnd)*screenWidth()/2.f+MOVEPIN_SIZE*1.5f, height()-50, Widgets::AlignCenter);
+		drawtextbgbox(s.str(), (_rulerStart+_rulerEnd)/2, height()-50, Widgets::AlignCenter);
 		Widgets::Painter::setColor(Widgets::Colors::white);
-		Widgets::Application::font()->draw(s.str().c_str(), (_rulerStart+_rulerEnd)/2.f*screenWidth()+MOVEPIN_SIZE*1.5f, height()-50, Widgets::AlignCenter);
+		Widgets::Application::font()->draw(s.str().c_str(), (_rulerStart+_rulerEnd)/2, height()-50, Widgets::AlignCenter);
 
 	}
 }
@@ -655,8 +679,8 @@ void AudioView::mousePressEvent(Widgets::MouseEvent *event) {
 	} else if(event->button() == Widgets::RightButton) {
 		if(!_rulerClicked && x > MOVEPIN_SIZE*1.5f && (!_manager.threshMode() || x <= width()-MOVEPIN_SIZE*1.5f)) {
 			_rulerClicked = true;
-			_rulerStart = (x-MOVEPIN_SIZE*1.5f)/(float)screenWidth();
-			_rulerEnd = (x-MOVEPIN_SIZE*1.5f)/(float)screenWidth();
+			_rulerStart = x;
+			_rulerEnd = x;
 			event->accept();
 		} else if(_rulerClicked) {
 			 _rulerClicked = false;
@@ -676,7 +700,7 @@ void AudioView::mouseReleaseEvent(Widgets::MouseEvent *event) {
 		_gainCtrlHoldTime = 0;
 	}
 
-	if(event->button() == Widgets::RightButton && fabs(_rulerStart-_rulerEnd)*screenWidth() < 1.f) {
+	if(event->button() == Widgets::RightButton && _rulerStart-_rulerEnd == 0) {
 		_rulerClicked = false;
 	}
 }
@@ -712,7 +736,7 @@ void AudioView::mouseMotionEvent(Widgets::MouseEvent *event) {
 	}
 
 	if(_rulerClicked) {
-		_rulerEnd = std::max(event->pos().x-MOVEPIN_SIZE*3/2, 0)/(float)screenWidth();
+		_rulerEnd = std::max(event->pos().x, MOVEPIN_SIZE*3/2);
 		event->accept();
 	}
 
