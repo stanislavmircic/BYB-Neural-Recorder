@@ -1,6 +1,6 @@
 #include "AudioView.h"
-#include <SDL/SDL.h>
-#include <SDL/SDL_opengl.h>
+#include <SDL.h>
+#include <SDL_opengl.h>
 #include "widgets/Painter.h"
 #include "widgets/TextureGL.h"
 #include "widgets/BitmapFontGL.h"
@@ -166,8 +166,18 @@ void AudioView::standardSettings() {
 	} else {
 		relOffsetChanged.emit(1000);
 	}
-
-	addChannel(0);
+    if(_manager.serialMode())
+    {
+        for(int i=0;i<_manager.numberOfSerialChannels();i++)
+        {
+            int nchan = addChannel(i);
+            setChannelColor(nchan, (i%COLOR_NUM)+1);
+        }
+    }
+    else
+    {
+        addChannel(0);
+    }
 }
 
 int AudioView::channelCount() const {
@@ -274,7 +284,7 @@ void AudioView::drawData(std::vector<std::pair<int16_t, int16_t> > &data, int ch
 	glBegin(GL_LINE_STRIP);
 	for(int j = 0; j < (int)data.size(); j++) {
 		int xc = j*dist+x;
-
+       // std::cout<<"X: "<<-data[j].first*_channels[channel].gain*scale+y<<"Y: "<<-data[j].second*_channels[channel].gain*scale+y<<"\n";
 		glVertex3i(xc, -data[j].first*_channels[channel].gain*scale+y, 0);
 		glVertex3i(xc, -data[j].second*_channels[channel].gain*scale+y, 0);
 	}
@@ -381,10 +391,33 @@ void AudioView::drawAudio() {
 			std::vector<std::pair<int16_t, int16_t> > data;
 
 			if(!_manager.threshMode()) {
-				int pos = _manager.pos()+_channelOffset-samples;
-				if(_manager.fileMode())
-					pos += samples/2;
-				data = _manager.getSamplesEnvelope(_channels[i].virtualDevice, pos, samples, screenw == 0 ? 1 : std::max(samples/screenw,1));
+                if(_manager.serialMode())
+                {
+                    int pos = _manager.pos()-samples;
+                    int16_t tempData[samples];
+                    std::vector< std::pair<int16_t, int16_t> > tempVectorData(samples);
+                    _manager.getData(_channels[i].virtualDevice, pos, samples, tempData);
+                   // std::cout<<"Samples:" << samples;
+                    for(int ind = 0;ind<samples;ind++)
+                    {
+                        //std::pair<int16_t, int16_t> bounding(0, 0);
+                       // std::cout<< tempData[ind] <<" \n";
+
+                        tempVectorData[ind].first = tempData[ind];
+                        tempVectorData[ind].second = tempData[ind];
+                    }
+                    data = tempVectorData;
+                }
+                else
+                {
+                    int pos = _manager.pos()+_channelOffset-samples;
+                    if(_manager.fileMode())
+                    {
+                        pos += samples/2;
+                    }
+                    data = _manager.getSamplesEnvelope(_channels[i].virtualDevice, pos, samples, screenw == 0 ? 1 : std::max(samples/screenw,1));
+                }
+				
 			} else {
 				data = _manager.getTriggerSamplesEnvelope(_channels[i].virtualDevice, samples, screenw == 0 ? 1 : std::max(samples/screenw,1));
 			}

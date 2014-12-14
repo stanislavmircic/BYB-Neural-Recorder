@@ -4,7 +4,7 @@
 #include <string>
 #include <list>
 
-#include <SDL/SDL_opengl.h>
+#include <SDL_opengl.h>
 
 namespace BackyardBrains {
 

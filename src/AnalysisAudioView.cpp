@@ -1,7 +1,7 @@
 #include "AnalysisAudioView.h"
 #include "widgets/Painter.h"
 #include "widgets/TextureGL.h"
-#include <SDL/SDL_opengl.h>
+#include <SDL_opengl.h>
 #include <iostream>
 namespace BackyardBrains {
 

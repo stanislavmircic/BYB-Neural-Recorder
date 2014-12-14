@@ -1,6 +1,6 @@
 #include "Painter.h"
 
-#include <SDL/SDL_opengl.h>
+#include <SDL_opengl.h>
 
 #include <cmath>
 

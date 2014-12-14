@@ -15,8 +15,8 @@
 #include "ConfigView.h"
 #include "AnalysisView.h"
 #include "RecordingBar.h"
-#include <SDL/SDL_opengl.h>
-#include <SDL/SDL.h>
+#include <SDL_opengl.h>
+#include <SDL.h>
 #include <iostream>
 #include <cerrno>
 #include <cstring>
