@@ -14,11 +14,11 @@
 		<string>https://github.com/stanislavmircic/BYB-Neural-Recorder.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>SpikeRecorder/SpikeRecorder.xcodeproj</string>
+	<string>SpikeRecorder.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>04748EC5FA2F3043B1D9712127E99DE42AD5EF92</key>
-		<string>../../..</string>
+		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://github.com/stanislavmircic/BYB-Neural-Recorder.git</string>
@@ -34,7 +34,7 @@
 			<key>IDESourceControlWCCIdentifierKey</key>
 			<string>04748EC5FA2F3043B1D9712127E99DE42AD5EF92</string>
 			<key>IDESourceControlWCCName</key>
-			<string>SpikeRecorder</string>
+			<string>BYB-SpikeRecorder</string>
 		</dict>
 	</array>
 </dict>

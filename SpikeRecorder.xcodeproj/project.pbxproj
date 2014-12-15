@@ -419,7 +419,7 @@
 			buildPhases = (
 			);
 			buildToolPath = /usr/bin/make;
-			buildWorkingDirectory = /Users/nik/Desktop/Projects/SpikeRecorder/SpikeRecorder;
+			buildWorkingDirectory = "/Users/nik/Desktop/Projects/BYB-SpikeRecorder";
 			dependencies = (
 			);
 			name = SpikeRecorder;

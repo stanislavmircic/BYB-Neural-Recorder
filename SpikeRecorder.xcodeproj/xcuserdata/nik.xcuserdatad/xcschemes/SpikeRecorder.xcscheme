@@ -40,7 +40,7 @@
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
       <PathRunnable
-         FilePath = "/Users/nik/Desktop/Projects/SpikeRecorder/SpikeRecorder/SpikeRecorder.app">
+         FilePath = "/Users/nik/Desktop/Projects/BYB-SpikeRecorder/SpikeRecorder.app">
       </PathRunnable>
       <MacroExpansion>
          <BuildableReference
