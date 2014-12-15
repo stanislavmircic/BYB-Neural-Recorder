@@ -86,11 +86,11 @@ LIBS = -Wl,-rpath,@executable_path/../Frameworks libbass.dylib $(OBJCFILES) -F. 
 
 else
 	CFLAGS += `$(BINPREFIX)sdl-config --cflags` # for Windows/Linux
-	EXTRA_CMD = 
+	EXTRA_CMD =
 
 	ifeq ($(OS),Linux)
 		OBJECTS += $(OBJECTS_LINUX)
-		LIBS = `sdl-config --libs` -lSDL_image -lGL -lGLU -lbass -lserial # for Linux
+		LIBS = `sdl-config --libs` -lSDL_image -lGL -lGLU -lbass -lpthread #-lserial # for Linux
 	else
 
 

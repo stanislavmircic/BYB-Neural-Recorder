@@ -20,15 +20,16 @@
 
 
 //just MAC classes
+#ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/serial/IOSerialKeys.h>
 #include <IOKit/IOBSD.h>
-
+#endif
 
 
 namespace BackyardBrains {
-    
+
     class ArduinoSerial {
     public:
         int openPort(const char *portName);
@@ -52,16 +53,18 @@ namespace BackyardBrains {
         int _numberOfChannels;
         int _samplingRate;
         int serialCounter;
-        
+
         bool returnTailForOneAndCheck();
         bool checkIfNextByteExist();
         bool areWeAtTheEndOfFrame();
         bool checkIfHaveWholeFrame();
+        #ifdef __APPLE__
         void macos_ports(io_iterator_t  * PortIterator);
+        #endif
         std::string _portName;
         bool _portOpened=false;
     };
-    
+
 }
 
 #endif /* defined(__SpikeRecorder__BYBArduino__) */
