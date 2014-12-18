@@ -500,13 +500,19 @@ void AudioView::paintEvent() {
 	drawRulerBox();
 
 	if(!_manager.threshMode())
+    {
 		drawSpikeTrain();
+    }
 	drawAudio();
 
 	if(_manager.threshMode())
+    {
 		drawThreshold(screenWidth());
+    }
 	else
+    {
 		drawMarkers();
+    }
 
 	drawRulerTime();
 	drawScale();

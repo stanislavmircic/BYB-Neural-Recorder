@@ -56,6 +56,7 @@ namespace BackyardBrains {
 
         _portName = std::string(portName);
         _portOpened = false;
+        triedToConfigureAgain = false;
         closeSerial();
         fd = 0;
         _numberOfChannels = 1;
@@ -194,6 +195,7 @@ namespace BackyardBrains {
         _portOpened = true;
 
 
+        setNumberOfChannelsAndSamplingRate(1, maxSamplingRate());
         //std::stringstream configString;
         //configString << "conf s:" << _samplingRate<<";c:"<<_numberOfChannels<<";\n";
         //writeToPort(configString.str().c_str(),configString.str().length());
@@ -217,29 +219,53 @@ namespace BackyardBrains {
         FD_ZERO(&write_fds);
         FD_ZERO(&except_fds);
         FD_SET(fd, &read_fds);
-        // Set timeout to 300 ms
+        // Set timeout to 60 ms
         struct timeval timeout;
         timeout.tv_sec = 0;
-        timeout.tv_usec = 6000;
+        timeout.tv_usec = 60000;
 
-        char buffer[1024];
+        char buffer[4024];
 
         int writeInteger = 0;
         ssize_t size = -1;
         int obufferIndex = 0;
         int numberOfFrames = 0;
-        /*if(serialCounter != 1)
-        {
-            serialCounter++;
-            return -1;
-        }
-        serialCounter = 0;*/
 
+
+       
         if (select(fd + 1, &read_fds, &write_fds, &except_fds, &timeout) == 1)
         {
-            size = read(fd, buffer, 1000);
+            size = read(fd, buffer, 4000);
         }
-
+        else
+        {
+            std::cout<<"Serial read error: Timeout\n";
+            if(!triedToConfigureAgain)
+            {
+                triedToConfigureAgain = true;
+                //setNumberOfChannelsAndSamplingRate(_numberOfChannels, maxSamplingRate());
+            }
+            
+        }
+        if (size < 0)
+        {
+            if(errno == EAGAIN)
+            {
+                std::cout<<"Serial read error: 1\n";
+            }
+            if(errno == EINTR)
+            {
+                std::cout<<"Serial read error: 2\n";
+            }
+        }
+#if defined(__linux__)
+        int bits;
+        if (size == 0 && ioctl(port_fd, TIOCMGET, &bits) < 0)
+        {
+            std::cout<<"Serial read error: 3\n";
+        }
+#endif
+        
        std::cout<<"------------------ Size: "<<size<<"\n";
         for(int i=0;i<size;i++)
         {
@@ -665,20 +691,20 @@ static const char *devnames[] = {
     // Close the port
     void ArduinoSerial::closeSerial(void)
     {
-       // if (!port_is_open) return;
-        //Output_flush();
-        //Input_discard();
-        //port_is_open = 0;
-        //port_name = "";
-
-        //#if defined(LINUX) || defined(MACOSX)
-        //tcsetattr(fd, TCSANOW, &settings_orig);
-        close(fd);
-        _portOpened = false;
-        /*#elif defined(WINDOWS)
-        //SetCommConfig(port_handle, &port_cfg_orig, sizeof(COMMCONFIG));
-        CloseHandle(port_handle);
-        #endif*/
+        
+        if(_portOpened)
+        {
+    #if defined(__linux__) || defined(__APPLE__)
+            // does this really work properly (and is it thread safe) on Linux??
+            //tcflush(fd, TCIOFLUSH);
+    #endif
+            close(fd);
+            _portOpened = false;
+            /*#elif defined(WINDOWS)
+            //SetCommConfig(port_handle, &port_cfg_orig, sizeof(COMMCONFIG));
+            CloseHandle(port_handle);
+            #endif*/
+        }
     }
 
 

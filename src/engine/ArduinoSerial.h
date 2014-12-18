@@ -11,7 +11,7 @@
 #define BACKYARDBRAINS_ARDUINOSERIAL_H
 
 #define USB_SERIAL_PORT "/dev/tty.usbmodemfa131" // (OSX Mac Book Air) Right
-#define SIZE_OF_CIRC_BUFFER 1024
+#define SIZE_OF_CIRC_BUFFER 4024
 #include <iostream>
 #include <fcntl.h>
 #include <termios.h>
@@ -63,6 +63,7 @@ namespace BackyardBrains {
         #endif
         std::string _portName;
         bool _portOpened=false;
+        bool triedToConfigureAgain;
     };
 
 }

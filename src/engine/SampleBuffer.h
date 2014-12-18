@@ -48,17 +48,32 @@ public:
 		_notEmpty = other._notEmpty;
 		return *this;
 	}
+    
+    
+    //
+    // Copy data from src to _buffer and
+    //For every level of _envelopes find min and max envelope
+    //
 	void addData(const int16_t *src, int64_t len)
 	{
 		if (len > 0)
 			_notEmpty = true;
 		for (int i = 0; i < len; i++)
 		{
+            
 			for (int j = 1; j <= SIZE_LOG2; j++)
 			{
 				const int skipCount = (1 << j);
 				const int envelopeIndex = (j-1);
+                
+                
+                //This envelopeSampleIndex has same value for skipCount consecutive samples.
+                //So for every level of envelope resolution (envelopeIndex) we find max and min sample
+                //on interval of skipCount consecutive samples and store as one value of envelope
+                //at envelopeSampleIndex index
 				const unsigned int envelopeSampleIndex = (_head / skipCount);
+                
+                
 				if (envelopeSampleIndex >= _envelopes[envelopeIndex].size())
 				{
 					// qDebug() << "By accessing _envelopes[" << envelopeIndex << "][" << envelopeSampleIndex << "] w/ size =" << _envelopes[envelopeIndex].size() << "we're out of bounds! _head =" << _head << "SIZE =" << SIZE;
@@ -67,13 +82,20 @@ public:
 				std::pair<int16_t, int16_t> &dst = _envelopes[envelopeIndex][envelopeSampleIndex];
 				if (_head % skipCount == 0)
 				{
+                    //if it is first in skipCount consecutive samples
+                    //take this to compare with others
 					dst = std::pair<int16_t, int16_t>(*src, *src);
 				}
 				else
 				{
+                    //if it is not first in skipCount consecutive samples
+                    // compare and keep max and min
 					dst = std::pair<int16_t, int16_t>(std::min(dst.first, *src), std::max(dst.second, *src));
 				}
 			}
+            
+            
+            
 			_buffer[_head++] = *src++;
 			if (_head == SIZE)
 				_head = 0;
@@ -81,6 +103,10 @@ public:
 		_pos += len;
 	}
     
+    //
+    // Just copy data from src interleaved buffer to non-interleaved _buffer buffer
+    //for "stride" channel
+    //
     void simpleAddData(const int16_t *src, int64_t len, int16_t stride)
     {
         if (len > 0)
@@ -113,9 +139,10 @@ public:
 	}
     
     
-    
-    
-    
+
+    //
+    //
+    //
 	void getDataEnvelope(std::pair<int16_t, int16_t> *dst, int64_t offset, int64_t len, int skip) const
 	{
 		// qDebug() << "SampleBuffer: CALLING getDataEnvelope(<dst>," << offset << "," << len << "," << skip << ") w/ force =" << force;
@@ -190,25 +217,33 @@ public:
 		}
 		// qDebug() << "SampleBuffer: RETURNING";
 	}
+    
+    
 	std::vector<int16_t> getData(int64_t offset, int64_t len) const
 	{
 		std::vector<int16_t> result(len);
 		getData(result.data(), offset, len);
 		return result;
 	}
+    
+    
 	std::vector< std::pair<int16_t, int16_t> > getDataEnvelope(int64_t offset, int64_t len, int skip) const
 	{
 		std::vector< std::pair<int16_t, int16_t> > result(len/skip);
 		getDataEnvelope(result.data(), offset, len, skip);
 		return result;
 	}
+    
+    
 	int16_t at(int64_t pos) const
 	{
 		if (pos <= _pos - SIZE || pos >= _pos)
 			return 0;
 		return _buffer[(_head + pos - _pos + SIZE)%SIZE];
 	}
+    
 	int64_t pos() const {return _pos;}
+    
 	void setPos(int64_t pos)
 	{
 		// qDebug() << "SampleBuffer: SETPOS CALLED";
@@ -235,9 +270,13 @@ public:
 	}
 	bool empty() const {return !_notEmpty;}
 private:
+    //cumulative number of samples added to _buffer since creation of this object
 	int64_t _pos;
+    //head position for _buffer circular buffer
 	int _head;
+    //circular buffer that contains original/noncompressed samples
 	int16_t * const _buffer;
+    //min and max envelopes for SIZE_LOG2 different resolutions
 	std::vector<std::pair<int16_t, int16_t> > _envelopes[SIZE_LOG2];
 	bool _notEmpty;
 };

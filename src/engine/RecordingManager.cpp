@@ -36,6 +36,10 @@ RecordingManager::~RecordingManager() {
 	BASS_Free();
 }
 
+    
+//
+// Construct metadata for new file
+//
 void RecordingManager::constructMetadata(MetadataChunk *m) const {
 	unsigned int nchan = 0;
 
@@ -59,6 +63,11 @@ void RecordingManager::constructMetadata(MetadataChunk *m) const {
 	m->markers = _markers;
 }
 
+    
+    
+//
+// Apply metadata from file to
+//
 void RecordingManager::applyMetadata(const MetadataChunk &m) {
 	for(unsigned int i = 0; i < m.channels.size(); i++) {
 		_recordingDevices[i].threshold = m.channels[i].threshold;
@@ -131,7 +140,7 @@ bool RecordingManager::initSerial(const char *portName)
        
     DWORD frequency = _arduinoSerial.maxSamplingRate()/_numOfSerialChannels;
     std::cout<<"Frequency: "<<frequency<<" Chan: "<<_numOfSerialChannels<<" Samp: "<<_arduinoSerial.maxSamplingRate()<<"\n";
-    HSTREAM stream = BASS_StreamCreate(frequency, 1, BASS_STREAM_DECODE, STREAMPROC_PUSH, NULL);
+    HSTREAM stream = BASS_StreamCreate(frequency, _numOfSerialChannels, BASS_STREAM_DECODE, STREAMPROC_PUSH, NULL);
     if(stream == 0) {
         std::cerr << "Bass Error: Failed to open serial stream. \n";
         serialError = "Bass Error: Failed to open serial stream. \n";
@@ -155,18 +164,20 @@ bool RecordingManager::initSerial(const char *portName)
     setSampleRate(info.freq);
     _devices[0].create(_pos, _numOfSerialChannels);
     _devices[0].bytespersample = bytespersample;
-    
-    _recordingDevices.resize(_numOfSerialChannels);
+
     for(unsigned int i = 0; i < _numOfSerialChannels; i++) {
-        VirtualDevice &virtualDevice = _recordingDevices[i];
+         VirtualDevice virtualDevice;
         
         virtualDevice.enabled = true;
         virtualDevice.device = 0;
         virtualDevice.channel = i;
-        virtualDevice.name = "Serial Channel ";
+        virtualDevice.name = "Serial channel";
         virtualDevice.threshold = 100;
         virtualDevice.bound = 0;
+        _recordingDevices.push_back(virtualDevice);
     }
+    
+    
     _devices[0].handle = stream;
     _fileMode = false;
     _serialMode = true;
@@ -176,7 +187,11 @@ bool RecordingManager::initSerial(const char *portName)
 
     return true;
 }
-    
+
+void RecordingManager::refreshSerialPorts()
+{
+    _arduinoSerial.getAllPortsList();
+}
     
 void RecordingManager::changeSerialPort(int portIndex)
 {
@@ -208,40 +223,32 @@ int RecordingManager::serialPortIndex()
     
 void RecordingManager::disconnectFromSerial()
 {
-    _arduinoSerial.closeSerial();
+    closeSerial();
     initRecordingDevices();
 }
     
-void RecordingManager::advanceSerialMode(uint32_t samples)
+void RecordingManager::closeSerial()
 {
-    int16_t tempSerialBuffer[1024];
-    int numberOfSamples = _arduinoSerial.readPort(tempSerialBuffer);
-    if(numberOfSamples!=-1)
-    {
-        for(int i=0;i<_arduinoSerial.numberOfChannels();i++)
-        {
-            _devices.begin()->second.sampleBuffers[i]->simpleAddData((const int16_t *)&tempSerialBuffer[i], numberOfSamples,_arduinoSerial.numberOfChannels());
-        }
-        _pos += numberOfSamples;
-    }
-    /* std::cout<<"Results ---\n";
-     for(int g=0;g<numberOfSamples;g++)
-     {
-     std::cout << tempSerialBuffer[g] << "\n";
-     }
-     
-     */
+    _numOfSerialChannels = 1;
+   // _arduinoSerial.setNumberOfChannelsAndSamplingRate(1, _arduinoSerial.maxSamplingRate());
+    _arduinoSerial.closeSerial();
+    _serialMode = false;
 }
+    
+
     
     
     
 bool RecordingManager::loadFile(const char *filename) {
+    
+    _spikeTrains.clear();
+    closeSerial();
+    
 	HSTREAM stream = BASS_StreamCreateFile(false, filename, 0, 0, BASS_STREAM_DECODE);
 	if(stream == 0) {
 		std::cerr << "Bass Error: Failed to load file '" << filename << "': " << BASS_ErrorGetCode() << "\n";
 		return false;
 	}
-
 	clear();
 	BASS_CHANNELINFO info;
 	BASS_ChannelGetInfo(stream, &info);
@@ -287,6 +294,7 @@ void RecordingManager::initRecordingDevices() {
 
 	clear();
 	_fileMode = false;
+    _spikeTrains.clear();
     _serialMode = false;
 
 	for (int i = 0; BASS_RecordGetDeviceInfo(i, &info); i++)
@@ -303,6 +311,8 @@ void RecordingManager::initRecordingDevices() {
 	}
 	_player.setVolume(0);
 	setSampleRate(DEFAULT_SAMPLE_RATE);
+    
+    //reset AudioView. add/bind first channel (or all channels in serial communication)
 	deviceReload.emit();
 }
 
@@ -391,6 +401,9 @@ void RecordingManager::addMarker(const std::string &id, int64_t offset) {
 	_markers.push_back(std::make_pair(id, _pos + offset));
 }
 
+//
+// Get metadata from file. All information about all channels, colors etc...
+//
 const char *RecordingManager::fileMetadataString() {
 	assert(_fileMode);
 	return BASS_ChannelGetTags(_devices[0].handle, BASS_TAG_RIFF_INFO);
@@ -546,6 +559,117 @@ void RecordingManager::advanceFileMode(uint32_t samples) {
 	}
 }
 
+    
+void RecordingManager::advanceSerialMode(uint32_t samples)
+{
+    
+    uint32_t len = 4024;
+    //len = std::min(samples, len);
+    std::cout<<len<<"\n";
+    const int channum = _arduinoSerial.numberOfChannels();
+    std::vector<int16_t> *channels = new std::vector<int16_t>[channum];//non-interleaved
+    int16_t *buffer = new int16_t[channum*len];
+    
+    
+    //get interleaved data for all channels
+    int samplesRead = _arduinoSerial.readPort(buffer);
+    if(samplesRead != -1) {
+       
+        //make separate buffer for every channel
+        for(int chan = 0; chan < channum; chan++)
+            channels[chan].resize(len);
+        
+        // de-interleave the channels
+        for (DWORD i = 0; i < samplesRead; i++) {
+            for(int chan = 0; chan < channum; chan++) {
+                channels[chan][i] = buffer[i*channum + chan];//sort data to channels
+                
+                
+                //if we are in first 10 seconds interval
+                //add current sample to summ used to remove DC component
+                if(_devices.begin()->second.dcBiasNum < _sampleRate*10) {
+                    _devices.begin()->second.dcBiasSum[chan] += channels[chan][i];
+                    if(chan == 0)
+                    {
+                        _devices.begin()->second.dcBiasNum++;
+                    }
+                }
+            }
+        }
+        
+        for(int chan = 0; chan < channum; chan++) {
+            //calculate DC offset in fist 10 sec for channel
+            int dcBias = _devices.begin()->second.dcBiasSum[chan]/_devices.begin()->second.dcBiasNum;
+            
+            for(DWORD i = 0; i < samplesRead; i++) {
+                
+                channels[chan][i] -= dcBias;//substract DC offset from channels data
+                
+                //add position of data samples that are greater than threshold to FIFO list _triggers
+                if(_threshMode && _devices.begin()->first*channum+chan == _selectedVDevice) {
+                    const int64_t ntrigger = _pos + i;
+                    const int thresh = _recordingDevices[_selectedVDevice].threshold;
+                    
+                    if(_triggers.empty() || ntrigger - _triggers.front() > _sampleRate/10) {
+                        if((thresh > 0 && channels[chan][i] > thresh) || (thresh <= 0 && channels[chan][i] < thresh)) {
+                            _triggers.push_front(_pos + i);
+                            if(_triggers.size() > (unsigned int)_threshAvgCount)//_threshAvgCount == 1
+                                _triggers.pop_back();
+                        }
+                    }
+                }
+            }
+            
+            if(_devices.begin()->second.sampleBuffers[0]->empty()) {
+                _devices.begin()->second.sampleBuffers[chan]->setPos(_pos);
+            }
+            //Here we add data to Sample buffer !!!!!
+            //copy data from temporary de-inrleaved data buffer to permanent buffer
+            _devices.begin()->second.sampleBuffers[chan]->addData(channels[chan].data(), samplesRead);
+        }
+        
+        delete[] channels;
+        delete[] buffer;
+        _pos+=samplesRead;
+        
+    }
+    else
+    {
+        //No new samples
+        delete[] channels;
+        delete[] buffer;
+    }
+    
+    
+    
+    
+   
+    
+    
+    /*
+    
+    int16_t tempSerialBuffer[1024];
+    int numberOfSamples = _arduinoSerial.readPort(tempSerialBuffer);
+    if(numberOfSamples!=-1)
+    {
+        for(int i=0;i<_arduinoSerial.numberOfChannels();i++)
+        {
+            _devices.begin()->second.sampleBuffers[i]->simpleAddData((const int16_t *)&tempSerialBuffer[i], numberOfSamples,_arduinoSerial.numberOfChannels());
+        }
+        _pos += numberOfSamples;
+    }
+    /* std::cout<<"Results ---\n";
+     for(int g=0;g<numberOfSamples;g++)
+     {
+     std::cout << tempSerialBuffer[g] << "\n";
+     }
+     
+     */
+    
+}
+    
+    
+    
 void RecordingManager::advance(uint32_t samples) {
     
     if(_serialMode)
@@ -563,17 +687,25 @@ void RecordingManager::advance(uint32_t samples) {
 		return;
 
 	const int64_t oldPos = _pos;
+    //We advance only number of samples that all
+    //devices and all channels have for sure
+    //in newPos we store/calculate that number
 	int64_t newPos = _pos;
 	bool firstTime = true;
 
+    //Can't get less than 5 seconds
 	uint32_t len = 5*sampleRate();
 	len = std::min(samples, len);
 
 	for (std::map<int, Device>::iterator it = _devices.begin(); it != _devices.end(); ++it) {
+        
+        //make interleaved & sepparate non-interleaved
+        //buffer for all channels on device
 		const int channum = it->second.channels;
-		std::vector<int16_t> *channels = new std::vector<int16_t>[channum];
+		std::vector<int16_t> *channels = new std::vector<int16_t>[channum];//non-interleaved
 		int16_t *buffer = new int16_t[channum*len];
 
+        //get interleaved data for all channels
 		DWORD samplesRead = BASS_ChannelGetData(it->second.handle, buffer, channum*len*sizeof(int16_t));
 		if(samplesRead == (DWORD)-1) {
 			std::cerr << "Bass Error: getting channel data failed: " << BASS_ErrorGetCode() << "\n";
@@ -583,14 +715,17 @@ void RecordingManager::advance(uint32_t samples) {
 		}
 		samplesRead /= sizeof(int16_t);
 
+        //make separate buffer for every channel
 		for(int chan = 0; chan < channum; chan++)
 			channels[chan].resize(len);
 
 		// de-interleave the channels
 		for (DWORD i = 0; i < samplesRead/channum; i++) {
 			for(int chan = 0; chan < channum; chan++) {
-				channels[chan][i] = buffer[i*channum + chan];
+				channels[chan][i] = buffer[i*channum + chan];//sort data to channels
 
+                //if we are in first 10 seconds interval
+                //add current sample to summ used to remove DC component
 				if(it->second.dcBiasNum < _sampleRate*10) {
 					it->second.dcBiasSum[chan] += channels[chan][i];
 					if(chan == 0)
@@ -599,19 +734,35 @@ void RecordingManager::advance(uint32_t samples) {
 			}
 		}
 
+        
+        //In next loop we:
+        
+        //calculate DC offset (average) for every channel
+        // and substract DC offset from channels data
+        
+        //also detect and store position of samples that
+        //are greater than trigger's threshold
+        
+        ////copy data from temporary de-inrleaved
+        //data buffer to permanent buffer
+        
 		for(int chan = 0; chan < channum; chan++) {
+            //calculate DC offset in fist 10 sec for channel
 			int dcBias = it->second.dcBiasSum[chan]/it->second.dcBiasNum;
 
 			for(DWORD i = 0; i < samplesRead/channum; i++) {
-				channels[chan][i] -= dcBias;
-				if(_threshMode && it->first*channum+chan == _selectedVDevice) {
+                
+				channels[chan][i] -= dcBias;//substract DC offset from channels data
+				
+                //add position of data samples that are greater than threshold to FIFO list _triggers
+                if(_threshMode && it->first*channum+chan == _selectedVDevice) {
 					const int64_t ntrigger = oldPos + i;
 					const int thresh = _recordingDevices[_selectedVDevice].threshold;
 
 					if(_triggers.empty() || ntrigger - _triggers.front() > _sampleRate/10) {
 						if((thresh > 0 && channels[chan][i] > thresh) || (thresh <= 0 && channels[chan][i] < thresh)) {
 							_triggers.push_front(oldPos + i);
-							if(_triggers.size() > (unsigned int)_threshAvgCount)
+							if(_triggers.size() > (unsigned int)_threshAvgCount)//_threshAvgCount == 1
 								_triggers.pop_back();
 						}
 					}
@@ -622,18 +773,27 @@ void RecordingManager::advance(uint32_t samples) {
 				it->second.sampleBuffers[chan]->setPos(oldPos);
 			}
 //Here we add data to Sample buffer !!!!!
+            //copy data from temporary de-inrleaved data buffer to permanent buffer
 			it->second.sampleBuffers[chan]->addData(channels[chan].data(), samplesRead/channum);
 		}
+        
+        //find minimum samples that one channel advanced and store in newPos
 		const int64_t posA = it->second.sampleBuffers[0]->pos();
 		if(!it->second.sampleBuffers[0]->empty() && (firstTime || posA < newPos)) {
 			newPos = posA;
 			firstTime = false;
 		}
 
+        //delete temp interleaved and non-interleaved buffers
 		delete[] channels;
 		delete[] buffer;
 	}
 
+    
+    //if player is more than 0.5 sec behind end of last batch of data
+    //(_pos is not yet updated with new data)
+    //Push rest of last batch of data to player
+    //if volume is zero just jump over it
 	if(_pos-_sampleRate/2 > _player.pos()) {
 		const uint32_t bsamples = _pos-_player.pos();
 
@@ -646,17 +806,21 @@ void RecordingManager::advance(uint32_t samples) {
 			} else {
 				memset(buf, 0, bsamples*sizeof(int16_t));
 			}
-
+            //push rest of last batch of data to player
 			_player.push(buf, bsamples*sizeof(int16_t));
 
 			delete[] buf;
 		} else {
+            //if volume is off just jump to begining
+            //of current batch of data
 			_player.setPos(_pos);
 		}
 	}
 	_player.paused();
 
-
+    //We advance only number of samples that all
+    //devices and all channels have in buffer for sure
+    //in newPos we store/calculate that number
 	if(newPos > oldPos)
 		_pos = newPos;
 
@@ -694,6 +858,10 @@ void RecordingManager::incRef(int virtualDeviceIndex) {
 
 	_devices[device].refCount++;
 	_recordingDevices[virtualDeviceIndex].bound++;
+    if(_recordingDevices[virtualDeviceIndex].bound>1)
+    {
+        _recordingDevices[virtualDeviceIndex].bound = 1;
+    }
 	assert(_recordingDevices[virtualDeviceIndex].bound < 2); // this shouldn’t happen at the moment
 
 	if (!_fileMode && _devices[device].handle == 0) {
@@ -735,6 +903,10 @@ void RecordingManager::decRef(int virtualDeviceIndex) {
 		return;
 	_devices[device].refCount--;
 	_recordingDevices[virtualDeviceIndex].bound--;
+    if(_recordingDevices[virtualDeviceIndex].bound<0)
+    {
+        _recordingDevices[virtualDeviceIndex].bound = 0;
+    }
 	if (_devices[device].refCount == 0)	{
 		if(!_fileMode) {
 			// make sure the device exists

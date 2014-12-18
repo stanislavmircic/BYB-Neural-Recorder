@@ -94,6 +94,7 @@ public:
     void setSerialNumberOfChannels(int numberOfChannels);
     int numberOfSerialChannels();
     std::string serialError;
+    void refreshSerialPorts();
 private:
 	struct Device
 	{
@@ -117,10 +118,11 @@ private:
 	void clear();
     void advanceSerialMode(uint32_t samples);
 	void advanceFileMode(uint32_t samples);
+    void closeSerial();
 	SampleBuffer *sampleBuffer(int virtualDeviceIndex);
 
 	VirtualDevices _recordingDevices;
-	std::map<int, Device> _devices;
+	std::map<int, Device> _devices;//contains pair (current read head position,device)
 	int64_t _pos;
 	bool _paused;
 	bool _threshMode;

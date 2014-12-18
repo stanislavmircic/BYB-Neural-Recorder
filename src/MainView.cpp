@@ -294,6 +294,7 @@ void MainView::filePressed() {
 }
 
 void MainView::configPressed() {
+    _manager.refreshSerialPorts();
 	ConfigView *c = new ConfigView(_manager, *_audioView);
 	c->setDeleteOnClose(true);
 	c->setGeometry(this->rect());
