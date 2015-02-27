@@ -1,5 +1,5 @@
 #include "Widget.h"
-#include "widgets/LayoutItem.h"
+#include "LayoutItem.h"
 #include "Application.h"
 
 #include <SDL.h>
@@ -72,7 +72,7 @@ void Widget::setLayout(Layout *newLayout) {
 void Widget::setGeometry(const Rect &newRect) {
 	const Size oldSize = _rect.size();
 	_rect = newRect;
-	
+
 	if (_layout)
 		_layout->setGeometry(newRect.translated(-geometry().topLeft()));
 	const Size newSize = _rect.size();

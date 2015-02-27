@@ -10,21 +10,28 @@
 #ifndef BACKYARDBRAINS_ARDUINOSERIAL_H
 #define BACKYARDBRAINS_ARDUINOSERIAL_H
 
-#define USB_SERIAL_PORT "/dev/tty.usbmodemfa131" // (OSX Mac Book Air) Right
 #define SIZE_OF_CIRC_BUFFER 4024
 #include <iostream>
 #include <fcntl.h>
-#include <termios.h>
+
 #include <list>
 #include <string>
 
 
 //just MAC classes
 #ifdef __APPLE__
+#include <termios.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/serial/IOSerialKeys.h>
 #include <IOKit/IOBSD.h>
+
+#elif __linux__
+#include <termios.h>
+
+
+#elif _WIN32
+#include <windows.h>
 #endif
 
 
@@ -59,7 +66,12 @@ namespace BackyardBrains {
         bool areWeAtTheEndOfFrame();
         bool checkIfHaveWholeFrame();
         #ifdef __APPLE__
-        void macos_ports(io_iterator_t  * PortIterator);
+            void macos_ports(io_iterator_t  * PortIterator);
+
+        #elif _WIN32
+            HANDLE port_handle;
+            COMMCONFIG port_cfg_orig;
+            COMMCONFIG port_cfg;
         #endif
         std::string _portName;
         bool _portOpened=false;

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="src" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/src" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/src" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="$(#sdl.include)/SDL" />
+		</Compiler>
+		<Linker>
+			<Add library="mingw32" />
+			<Add library="SDLmain" />
+			<Add library="SDL.dll" />
+			<Add library="user32" />
+			<Add library="gdi32" />
+			<Add library="winmm" />
+			<Add library="dxguid" />
+			<Add directory="$(#sdl.lib)" />
+		</Linker>
+		<Unit filename="../data/analysis.png" />
+		<Unit filename="../data/analysis.svg" />
+		<Unit filename="../data/analysishigh.png" />
+		<Unit filename="../data/ascii.png" />
+		<Unit filename="../data/backward.png" />
+		<Unit filename="../data/backward.svg" />
+		<Unit filename="../data/backwardhigh.png" />
+		<Unit filename="../data/ckboxoff.png" />
+		<Unit filename="../data/ckboxon.png" />
+		<Unit filename="../data/ckboxon.svg" />
+		<Unit filename="../data/config.png" />
+		<Unit filename="../data/config.svg" />
+		<Unit filename="../data/confighigh.png" />
+		<Unit filename="../data/connected.png" />
+		<Unit filename="../data/disconnected.png" />
+		<Unit filename="../data/dropdown.png" />
+		<Unit filename="../data/dropdown.svg" />
+		<Unit filename="../data/file.png" />
+		<Unit filename="../data/file.svg" />
+		<Unit filename="../data/filehigh.png" />
+		<Unit filename="../data/forward.png" />
+		<Unit filename="../data/forward.svg" />
+		<Unit filename="../data/forwardhigh.png" />
+		<Unit filename="../data/gaindown.png" />
+		<Unit filename="../data/gainup.png" />
+		<Unit filename="../data/gainup.svg" />
+		<Unit filename="../data/pause.png" />
+		<Unit filename="../data/pause.svg" />
+		<Unit filename="../data/pausehigh.png" />
+		<Unit filename="../data/pin.png" />
+		<Unit filename="../data/pin.svg" />
+		<Unit filename="../data/play.png" />
+		<Unit filename="../data/play.svg" />
+		<Unit filename="../data/playhigh.png" />
+		<Unit filename="../data/rec.png" />
+		<Unit filename="../data/rec.svg" />
+		<Unit filename="../data/rechigh.png" />
+		<Unit filename="../data/save.png" />
+		<Unit filename="../data/save.svg" />
+		<Unit filename="../data/savehigh.png" />
+		<Unit filename="../data/thresh.png" />
+		<Unit filename="../data/thresh.svg" />
+		<Unit filename="../data/threshhigh.png" />
+		<Unit filename="../data/threshpin.png" />
+		<Unit filename="../data/threshpin.svg" />
+		<Unit filename="AnalysisAudioView.cpp" />
+		<Unit filename="AnalysisAudioView.h" />
+		<Unit filename="AnalysisView.cpp" />
+		<Unit filename="AnalysisView.h" />
+		<Unit filename="AudioView.cpp" />
+		<Unit filename="AudioView.h" />
+		<Unit filename="ColorDropDownList.cpp" />
+		<Unit filename="ColorDropDownList.h" />
+		<Unit filename="ConfigView.cpp" />
+		<Unit filename="ConfigView.h" />
+		<Unit filename="DropDownList.cpp" />
+		<Unit filename="DropDownList.h" />
+		<Unit filename="Game.cpp" />
+		<Unit filename="Game.h" />
+		<Unit filename="MainView.cpp" />
+		<Unit filename="MainView.h" />
+		<Unit filename="Paths.h" />
+		<Unit filename="RecordingBar.cpp" />
+		<Unit filename="RecordingBar.h" />
+		<Unit filename="cb.bmp" />
+		<Unit filename="engine/ArduinoSerial.cpp" />
+		<Unit filename="engine/ArduinoSerial.h" />
+		<Unit filename="engine/FileRecorder.cpp" />
+		<Unit filename="engine/FileRecorder.h" />
+		<Unit filename="engine/Player.cpp" />
+		<Unit filename="engine/Player.h" />
+		<Unit filename="engine/RecordingManager.cpp" />
+		<Unit filename="engine/RecordingManager.h" />
+		<Unit filename="engine/SampleBuffer.h" />
+		<Unit filename="engine/SpikeSorter.cpp" />
+		<Unit filename="engine/SpikeSorter.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="native/PathsWin.cpp" />
+		<Unit filename="widgets/Application.cpp" />
+		<Unit filename="widgets/Application.h" />
+		<Unit filename="widgets/BitmapFontGL.cpp" />
+		<Unit filename="widgets/BitmapFontGL.h" />
+		<Unit filename="widgets/BoxLayout.cpp" />
+		<Unit filename="widgets/BoxLayout.h" />
+		<Unit filename="widgets/Color.h" />
+		<Unit filename="widgets/ErrorBox.cpp" />
+		<Unit filename="widgets/ErrorBox.h" />
+		<Unit filename="widgets/Event.h" />
+		<Unit filename="widgets/FileDialog.h" />
+		<Unit filename="widgets/Label.cpp" />
+		<Unit filename="widgets/Label.h" />
+		<Unit filename="widgets/LayoutItem.cpp" />
+		<Unit filename="widgets/LayoutItem.h" />
+		<Unit filename="widgets/LoadTexture.cpp" />
+		<Unit filename="widgets/LoadTexture.h" />
+		<Unit filename="widgets/Painter.cpp" />
+		<Unit filename="widgets/Painter.h" />
+		<Unit filename="widgets/Point.h" />
+		<Unit filename="widgets/PushButton.cpp" />
+		<Unit filename="widgets/PushButton.h" />
+		<Unit filename="widgets/Rect.h" />
+		<Unit filename="widgets/ScrollBar.cpp" />
+		<Unit filename="widgets/ScrollBar.h" />
+		<Unit filename="widgets/Size.h" />
+		<Unit filename="widgets/SizePolicy.h" />
+		<Unit filename="widgets/TextureGL.cpp" />
+		<Unit filename="widgets/TextureGL.h" />
+		<Unit filename="widgets/Widget.cpp" />
+		<Unit filename="widgets/Widget.h" />
+		<Unit filename="widgets/global.h" />
+		<Unit filename="widgets/native/FileDialogWin.cpp" />
+		<Unit filename="widgets/util.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

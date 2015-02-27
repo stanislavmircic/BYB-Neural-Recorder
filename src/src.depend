@@ -1,0 +1,688 @@
+# depslib dependency file v1.0
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\analysisaudioview.cpp
+	"AnalysisAudioView.h"
+	"widgets/Painter.h"
+	"widgets/TextureGL.h"
+	<SDL_opengl.h>
+	<iostream>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\analysisaudioview.h
+	"AudioView.h"
+	"engine/SpikeSorter.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\audioview.h
+	"widgets/Widget.h"
+	"widgets/ScrollBar.h"
+	"engine/RecordingManager.h"
+	"widgets/Color.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\widget.h
+	<vector>
+	<list>
+	<cstring>
+	<string>
+	<sigslot.h>
+	"Rect.h"
+	"Size.h"
+	"Event.h"
+	"SizePolicy.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\rect.h
+	"Point.h"
+	"Size.h"
+	<algorithm>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\point.h
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\size.h
+	<algorithm>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\event.h
+	"Point.h"
+	<SDL_keysym.h>
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_keysym.h
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\sizepolicy.h
+	"global.h"
+	"Rect.h"
+	"Size.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\global.h
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\scrollbar.h
+	"Widget.h"
+	"global.h"
+	<string>
+
+1421490509 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\engine\recordingmanager.h
+	<bass.h>
+	<sigslot.h>
+	<vector>
+	<string>
+	<map>
+	<stdint.h>
+	"Player.h"
+	"ArduinoSerial.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\engine\player.h
+	<bass.h>
+	<sigslot.h>
+	<stdint.h>
+
+1421515588 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\engine\arduinoserial.h
+	<iostream>
+	<fcntl.h>
+	<list>
+	<string>
+	<termios.h>
+	<CoreFoundation/CoreFoundation.h>
+	<IOKit/IOKitLib.h>
+	<IOKit/serial/IOSerialKeys.h>
+	<IOKit/IOBSD.h>
+	<termios.h>
+	<windows.h>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\color.h
+	<stdint.h>
+	<climits>
+	"util.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\util.h
+	<algorithm>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\engine\spikesorter.h
+	<string>
+	<vector>
+	<stdint.h>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\painter.h
+	"Color.h"
+	"Rect.h"
+	"Point.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\texturegl.h
+	<string>
+	<list>
+	<SDL_opengl.h>
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_opengl.h
+	"SDL_config.h"
+	<windows.h>
+	<OpenGL/gl.h>
+	<OpenGL/glu.h>
+	<gl.h>
+	<glu.h>
+	<GL/gl.h>
+	<GL/glu.h>
+	<windows.h>
+	<stddef.h>
+
+1326110988 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_config.h
+	"SDL_platform.h"
+	"SDL_config_dreamcast.h"
+	"SDL_config_macos.h"
+	"SDL_config_macosx.h"
+	"SDL_config_symbian.h"
+	"SDL_config_win32.h"
+	"SDL_config_os2.h"
+	"SDL_config_minimal.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_platform.h
+
+1326110994 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_config_win32.h
+	"SDL_platform.h"
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\analysisview.cpp
+	"AnalysisView.h"
+	"widgets/PushButton.h"
+	"widgets/BoxLayout.h"
+	"widgets/TextureGL.h"
+	"widgets/Painter.h"
+	"widgets/Application.h"
+	"widgets/BitmapFontGL.h"
+	"widgets/Label.h"
+	"widgets/ErrorBox.h"
+	"engine/FileRecorder.h"
+	"AnalysisAudioView.h"
+	<sstream>
+	<iostream>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\analysisview.h
+	"widgets/Widget.h"
+	"engine/SpikeSorter.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\pushbutton.h
+	"Widget.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\boxlayout.h
+	"LayoutItem.h"
+	<vector>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\layoutitem.h
+	"global.h"
+	"Rect.h"
+	"Size.h"
+	"SizePolicy.h"
+	<climits>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\application.h
+	"Widget.h"
+	"Size.h"
+	<list>
+	<string>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\bitmapfontgl.h
+	"global.h"
+	"TextureGL.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\label.h
+	"Widget.h"
+	<string>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\errorbox.h
+	"Widget.h"
+	<string>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\engine\filerecorder.h
+	"RecordingManager.h"
+	<fstream>
+
+1421490509 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\audioview.cpp
+	"AudioView.h"
+	<SDL.h>
+	<SDL_opengl.h>
+	"widgets/Painter.h"
+	"widgets/TextureGL.h"
+	"widgets/BitmapFontGL.h"
+	"widgets/Application.h"
+	"engine/SampleBuffer.h"
+	"engine/FileRecorder.h"
+	<iostream>
+	<sstream>
+	<utility>
+	<algorithm>
+	<cmath>
+	<cassert>
+	<cstdlib>
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl.h
+	"SDL_main.h"
+	"SDL_stdinc.h"
+	"SDL_audio.h"
+	"SDL_cdrom.h"
+	"SDL_cpuinfo.h"
+	"SDL_endian.h"
+	"SDL_error.h"
+	"SDL_events.h"
+	"SDL_loadso.h"
+	"SDL_mutex.h"
+	"SDL_rwops.h"
+	"SDL_thread.h"
+	"SDL_timer.h"
+	"SDL_video.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_main.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_stdinc.h
+	"SDL_config.h"
+	<sys/types.h>
+	<stdio.h>
+	<stdlib.h>
+	<stddef.h>
+	<stdarg.h>
+	<stdlib.h>
+	<malloc.h>
+	<stddef.h>
+	<stdarg.h>
+	<memory.h>
+	<string.h>
+	<strings.h>
+	<inttypes.h>
+	<stdint.h>
+	<ctype.h>
+	<iconv.h>
+	"begin_code.h"
+	<alloca.h>
+	<malloc.h>
+	<malloc.h>
+	<malloc.h>
+	<stdlib.h>
+	"close_code.h"
+
+1326111000 c:\program files (x86)\codeblocks\mingw\include\sdl\begin_code.h
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\close_code.h
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_audio.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_endian.h"
+	"SDL_mutex.h"
+	"SDL_thread.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_error.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_endian.h
+	"SDL_stdinc.h"
+	<endian.h>
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_mutex.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_thread.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_mutex.h"
+	"begin_code.h"
+	<process.h>
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_rwops.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_cdrom.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_cpuinfo.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_events.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_active.h"
+	"SDL_keyboard.h"
+	"SDL_mouse.h"
+	"SDL_joystick.h"
+	"SDL_quit.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_active.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_keyboard.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_keysym.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_mouse.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_video.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_joystick.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_quit.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_loadso.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_timer.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1325738640 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_version.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1421490509 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\engine\samplebuffer.h
+	<vector>
+	<cstring>
+	<cassert>
+	<stdint.h>
+	<iostream>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\colordropdownlist.cpp
+	"ColorDropDownList.h"
+	"widgets/Painter.h"
+	"widgets/Application.h"
+	"widgets/Event.h"
+	<iostream>
+	"widgets/BoxLayout.h"
+	"widgets/ScrollBar.h"
+	"widgets/TextureGL.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\colordropdownlist.h
+	"widgets/Widget.h"
+	"widgets/Color.h"
+	<vector>
+	<sigslot.h>
+
+1421490509 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\configview.cpp
+	"ConfigView.h"
+	"engine/RecordingManager.h"
+	"widgets/Painter.h"
+	"widgets/Color.h"
+	"widgets/BoxLayout.h"
+	"widgets/PushButton.h"
+	"widgets/TextureGL.h"
+	"widgets/Application.h"
+	"widgets/BitmapFontGL.h"
+	"widgets/ErrorBox.h"
+	"DropDownList.h"
+	"widgets/Label.h"
+	"AudioView.h"
+	"ColorDropDownList.h"
+
+1421490509 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\configview.h
+	"widgets/Widget.h"
+	"widgets/PushButton.h"
+	"DropDownList.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\dropdownlist.h
+	<vector>
+	<sigslot.h>
+	<string>
+	"widgets/Widget.h"
+	"widgets/Color.h"
+
+1421490509 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\dropdownlist.cpp
+	"DropDownList.h"
+	"widgets/Painter.h"
+	"widgets/Application.h"
+	"widgets/Event.h"
+	<iostream>
+	"widgets/BitmapFontGL.h"
+	"widgets/BoxLayout.h"
+	"widgets/ScrollBar.h"
+	"widgets/TextureGL.h"
+	<SDL_opengl.h>
+	<iostream>
+	<cstdio>
+
+1421607358 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\engine\arduinoserial.cpp
+	"ArduinoSerial.h"
+	<sys/types.h>
+	<unistd.h>
+	<sstream>
+	<stdint.h>
+	<sys/uio.h>
+	<sys/types.h>
+	<fcntl.h>
+	<errno.h>
+	<sys/select.h>
+	<termios.h>
+	<unistd.h>
+	<dirent.h>
+	<sys/stat.h>
+	<sys/ioctl.h>
+	<linux/serial.h>
+	<cstring>
+	<cstdio>
+	<sys/uio.h>
+	<stdio.h>
+	<string.h>
+	<sys/ioctl.h>
+	<errno.h>
+	<paths.h>
+	<termios.h>
+	<sysexits.h>
+	<sys/param.h>
+	<sys/select.h>
+	<sys/time.h>
+	<time.h>
+	<windows.h>
+	<cstdio>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\engine\filerecorder.cpp
+	"FileRecorder.h"
+	"RecordingManager.h"
+	<bass.h>
+	<cstdio>
+	<sstream>
+	<iostream>
+	<cstdlib>
+	<cstring>
+	<string>
+	<cassert>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\engine\player.cpp
+	"Player.h"
+	<iostream>
+
+1421490509 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\engine\recordingmanager.cpp
+	"RecordingManager.h"
+	"SampleBuffer.h"
+	"FileRecorder.h"
+	<iostream>
+	<cstdlib>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\engine\spikesorter.cpp
+	"SpikeSorter.h"
+	<cstring>
+	<iostream>
+	<bass.h>
+	<cmath>
+	<algorithm>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\game.cpp
+	"Game.h"
+	"MainView.h"
+	"widgets/TextureGL.h"
+	<SDL.h>
+	<iostream>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\game.h
+	"widgets/Application.h"
+	"engine/RecordingManager.h"
+	"engine/FileRecorder.h"
+	"engine/ArduinoSerial.h"
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\mainview.h
+	"widgets/Widget.h"
+
+1421490859 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\main.cpp
+	"widgets/Application.h"
+	"Game.h"
+	<SDL.h>
+	<cstring>
+	<string>
+	<direct.h>
+	<unistd.h>
+
+1421490509 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\mainview.cpp
+	"MainView.h"
+	"widgets/Application.h"
+	"widgets/PushButton.h"
+	"widgets/BoxLayout.h"
+	"widgets/TextureGL.h"
+	"widgets/ScrollBar.h"
+	"widgets/FileDialog.h"
+	"widgets/Label.h"
+	"widgets/ErrorBox.h"
+	"engine/SpikeSorter.h"
+	"engine/FileRecorder.h"
+	"Paths.h"
+	"MainView.h"
+	"AudioView.h"
+	"ConfigView.h"
+	"AnalysisView.h"
+	"RecordingBar.h"
+	<SDL_opengl.h>
+	<SDL.h>
+	<iostream>
+	<cerrno>
+	<cstring>
+	<ctime>
+	<sstream>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\filedialog.h
+	<sigslot.h>
+	<string>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\paths.h
+	<string>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\recordingbar.h
+	"widgets/Widget.h"
+
+1421603388 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\native\pathswin.cpp
+	"../Paths.h"
+	<windows.h>
+	<shlobj.h>
+	<direct.h>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\recordingbar.cpp
+	"RecordingBar.h"
+	<SDL.h>
+	"widgets/Painter.h"
+	"widgets/BitmapFontGL.h"
+	"widgets/Application.h"
+	"engine/FileRecorder.h"
+	<iostream>
+	<cmath>
+	<sstream>
+	<iomanip>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\application.cpp
+	"Application.h"
+	"TextureGL.h"
+	"LayoutItem.h"
+	"BitmapFontGL.h"
+	"Color.h"
+	<SDL.h>
+	<SDL_opengl.h>
+	<iostream>
+	<cstdlib>
+	<bass.h>
+	<cassert>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\bitmapfontgl.cpp
+	"BitmapFontGL.h"
+	<cstring>
+	<iostream>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\boxlayout.cpp
+	"BoxLayout.h"
+	"Widget.h"
+	<iostream>
+	<typeinfo>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\errorbox.cpp
+	"ErrorBox.h"
+	"BitmapFontGL.h"
+	"TextureGL.h"
+	"Application.h"
+	"Painter.h"
+	<sstream>
+	<iostream>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\label.cpp
+	"Label.h"
+	"BitmapFontGL.h"
+	"Application.h"
+	"Painter.h"
+	<sstream>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\layoutitem.cpp
+	"LayoutItem.h"
+	"Widget.h"
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\loadtexture.cpp
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_opengl.h>
+	<cstring>
+
+1258246278 c:\program files (x86)\codeblocks\mingw\include\sdl\sdl_image.h
+	"SDL.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\native\filedialogwin.cpp
+	"../FileDialog.h"
+	<windows.h>
+	<stdio.h>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\painter.cpp
+	"Painter.h"
+	<SDL_opengl.h>
+	<cmath>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\pushbutton.cpp
+	"PushButton.h"
+	"Painter.h"
+	"BitmapFontGL.h"
+	<iostream>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\scrollbar.cpp
+	"ScrollBar.h"
+	"Painter.h"
+	<iostream>
+	<cassert>
+
+1421490483 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\texturegl.cpp
+	"TextureGL.h"
+	"LoadTexture.h"
+	<cstdlib>
+	<iostream>
+
+1421490483 c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\loadtexture.h
+	<SDL_opengl.h>
+
+1421603882 source:c:\users\stanislav\desktop\byb\spike recorder\byb-neural-recorder\src\widgets\widget.cpp
+	"Widget.h"
+	"LayoutItem.h"
+	"Application.h"
+	<SDL.h>
+	<SDL_opengl.h>
+	<algorithm>
+	<iostream>
+	<typeinfo>
+	<cassert>
+

@@ -8,12 +8,13 @@
 
 #include "ArduinoSerial.h"
 #include <sys/types.h>
-#include <sys/uio.h>
+
 #include <unistd.h>
 #include <sstream>
 #include <stdint.h>
 
 #if defined(__linux__)
+#include <sys/uio.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -29,6 +30,7 @@
 
 #elif defined(__APPLE__)
 //added for port scan
+#include <sys/uio.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -41,6 +43,13 @@
 #include <sys/time.h>
 #include <time.h>
 
+#elif _WIN32
+#include <windows.h>
+#define win32_err(s) FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, \
+			GetLastError(), 0, (s), sizeof(s), NULL)
+#define QUERYDOSDEVICE_BUFFER_SIZE 262144
+typedef unsigned int uint;
+#include <cstdio>
 #endif
 
 
@@ -60,11 +69,13 @@ namespace BackyardBrains {
         closeSerial();
         fd = 0;
         _numberOfChannels = 1;
+#if defined(__APPLE__) || defined(__linux__)
         struct termios options;
 
         fd = open(portName, O_RDWR | O_NOCTTY | O_NDELAY);//O_SHLOCK
         sleep(2);
         int bits;
+#endif
 #ifdef __APPLE__
         std::stringstream sstm;
 
@@ -168,6 +179,7 @@ namespace BackyardBrains {
     }
     tcflush(port_fd, TCIFLUSH);*/
 #endif
+#if defined(__APPLE__) || defined(__linux__)
         if (fd == -1)
         {
             std::cout<<"Can't open serial port\n";
@@ -188,17 +200,113 @@ namespace BackyardBrains {
 
         // set the new port options
         tcsetattr(fd, TCSANOW, &options);
+#endif
+
+#ifdef _WIN32
+
+	COMMCONFIG cfg;
+	COMMTIMEOUTS timeouts;
+	int got_default_cfg=0, port_num;
+	char buf[1024], name_createfile[64], name_commconfig[64], *p;
+	DWORD len;
+
+	snprintf(buf, sizeof(buf), "%s", _portName.c_str());
+	p = strstr(buf, "COM");
+	if (p && sscanf(p + 3, "%d", &port_num) == 1) {
+		printf("port_num = %d\n", port_num);
+		snprintf(name_createfile, sizeof(name_createfile), "\\\\.\\COM%d", port_num);
+		snprintf(name_commconfig, sizeof(name_commconfig), "COM%d", port_num);
+	} else {
+		snprintf(name_createfile, sizeof(name_createfile), "%s", _portName.c_str());
+		snprintf(name_commconfig, sizeof(name_commconfig), "%s", _portName.c_str());
+	}
+	len = sizeof(COMMCONFIG);
+	if (GetDefaultCommConfig(name_commconfig, &cfg, &len)) {
+		// this prevents unintentionally raising DTR when opening
+		// might only work on COM1 to COM9
+		got_default_cfg = 1;
+		memcpy(&port_cfg_orig, &cfg, sizeof(COMMCONFIG));
+		cfg.dcb.fDtrControl = DTR_CONTROL_DISABLE;
+		cfg.dcb.fRtsControl = RTS_CONTROL_DISABLE;
+		SetDefaultCommConfig(name_commconfig, &cfg, sizeof(COMMCONFIG));
+	} else {
+		printf("error with GetDefaultCommConfig\n");
+	}
+	port_handle = CreateFile(name_createfile, GENERIC_READ | GENERIC_WRITE,
+	   0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+	if (port_handle == INVALID_HANDLE_VALUE) {
+		win32_err(buf);
+		//error_msg =  "Unable to open " + _portName + ", " + buf;
+		return -1;
+	}
+	len = sizeof(COMMCONFIG);
+	if (!GetCommConfig(port_handle, &port_cfg, &len)) {
+		CloseHandle(port_handle);
+		win32_err(buf);
+		//error_msg = "Unable to read communication config on " + _portName + ", " + buf;
+		return -1;
+	}
+	if (!got_default_cfg) {
+		memcpy(&port_cfg_orig, &port_cfg, sizeof(COMMCONFIG));
+	}
+	// http://msdn2.microsoft.com/en-us/library/aa363188(VS.85).aspx
+	port_cfg.dcb.BaudRate = 230400;
+	port_cfg.dcb.fBinary = TRUE;
+	port_cfg.dcb.fParity = FALSE;
+	port_cfg.dcb.fOutxCtsFlow = FALSE;
+	port_cfg.dcb.fOutxDsrFlow = FALSE;
+	port_cfg.dcb.fDtrControl = DTR_CONTROL_DISABLE;
+	port_cfg.dcb.fDsrSensitivity = FALSE;
+	port_cfg.dcb.fTXContinueOnXoff = TRUE;	// ???
+	port_cfg.dcb.fOutX = FALSE;
+	port_cfg.dcb.fInX = FALSE;
+	port_cfg.dcb.fErrorChar = FALSE;
+	port_cfg.dcb.fNull = FALSE;
+	port_cfg.dcb.fRtsControl = RTS_CONTROL_DISABLE;
+	port_cfg.dcb.fAbortOnError = FALSE;
+	port_cfg.dcb.ByteSize = 8;
+	port_cfg.dcb.Parity = NOPARITY;
+	port_cfg.dcb.StopBits = ONESTOPBIT;
+	if (!SetCommConfig(port_handle, &port_cfg, sizeof(COMMCONFIG))) {
+		CloseHandle(port_handle);
+		win32_err(buf);
+		//error_msg = "Unable to write communication config to " + name + ", " + buf;
+		return -1;
+	}
+	if (!EscapeCommFunction(port_handle, CLRDTR | CLRRTS)) {
+		CloseHandle(port_handle);
+		win32_err(buf);
+		//error_msg = "Unable to control serial port signals on " + name + ", " + buf;
+		return -1;
+	}
+	// http://msdn2.microsoft.com/en-us/library/aa363190(VS.85).aspx
+	// setting to all zeros means timeouts are not used
+	//timeouts.ReadIntervalTimeout		= 0;
+	timeouts.ReadIntervalTimeout		= MAXDWORD;
+	timeouts.ReadTotalTimeoutMultiplier	= 0;
+	timeouts.ReadTotalTimeoutConstant	= 0;
+	timeouts.WriteTotalTimeoutMultiplier	= 0;
+	timeouts.WriteTotalTimeoutConstant	= 0;
+	if (!SetCommTimeouts(port_handle, &timeouts)) {
+		CloseHandle(port_handle);
+		win32_err(buf);
+		//error_msg = "Unable to write timeout settings to " + name + ", " + buf;
+		return -1;
+	}
+
+#endif // _WIN32
+
         circularBuffer[0] = '\n';
+
         cBufHead = 0;
         cBufTail = 0;
+
         serialCounter = 0;
+
         _portOpened = true;
 
 
         setNumberOfChannelsAndSamplingRate(1, maxSamplingRate());
-        //std::stringstream configString;
-        //configString << "conf s:" << _samplingRate<<";c:"<<_numberOfChannels<<";\n";
-        //writeToPort(configString.str().c_str(),configString.str().length());
 
 
         return fd;
@@ -213,6 +321,13 @@ namespace BackyardBrains {
     {
 
 
+        char buffer[4024];
+
+        int writeInteger = 0;
+        int obufferIndex = 0;
+        int numberOfFrames = 0;
+        ssize_t size = -1;
+#if defined(__APPLE__) || defined(__linux__)
         // Initialize file descriptor sets
         fd_set read_fds, write_fds, except_fds;
         FD_ZERO(&read_fds);
@@ -224,15 +339,9 @@ namespace BackyardBrains {
         timeout.tv_sec = 0;
         timeout.tv_usec = 60000;
 
-        char buffer[4024];
-
-        int writeInteger = 0;
-        ssize_t size = -1;
-        int obufferIndex = 0;
-        int numberOfFrames = 0;
 
 
-       
+
         if (select(fd + 1, &read_fds, &write_fds, &except_fds, &timeout) == 1)
         {
             size = read(fd, buffer, 4000);
@@ -245,7 +354,7 @@ namespace BackyardBrains {
                 triedToConfigureAgain = true;
                 //setNumberOfChannelsAndSamplingRate(_numberOfChannels, maxSamplingRate());
             }
-            
+
         }
         if (size < 0)
         {
@@ -258,6 +367,7 @@ namespace BackyardBrains {
                 std::cout<<"Serial read error: 2\n";
             }
         }
+#endif // defined
 #if defined(__linux__)
         int bits;
         if (size == 0 && ioctl(port_fd, TIOCMGET, &bits) < 0)
@@ -265,7 +375,58 @@ namespace BackyardBrains {
             std::cout<<"Serial read error: 3\n";
         }
 #endif
-        
+
+#if defined(_WIN32)
+
+
+// first, we'll find out how many bytes have been received
+	// and are currently waiting for us in the receive buffer.
+	//   http://msdn.microsoft.com/en-us/library/ms885167.aspx
+	//   http://msdn.microsoft.com/en-us/library/ms885173.aspx
+	//   http://source.winehq.org/WineAPI/ClearCommError.html
+	COMSTAT st;
+	DWORD errmask=0, num_read, num_request;
+	OVERLAPPED ov;
+	int count = 4000;
+
+	int r;
+	if (!ClearCommError(port_handle, &errmask, &st)) return -1;
+	//printf("Read, %d requested, %lu buffered\n", count, st.cbInQue);
+	if (st.cbInQue <= 0) return 0;
+	// now do a ReadFile, now that we know how much we can read
+	// a blocking (non-overlapped) read would be simple, but win32
+	// is all-or-nothing on async I/O and we must have it enabled
+	// because it's the only way to get a timeout for WaitCommEvent
+	num_request = ((DWORD)count < st.cbInQue) ? (DWORD)count : st.cbInQue;
+	ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (ov.hEvent == NULL) return -1;
+	ov.Internal = ov.InternalHigh = 0;
+	ov.Offset = ov.OffsetHigh = 0;
+	if (ReadFile(port_handle, buffer, num_request, &num_read, &ov)) {
+		// this should usually be the result, since we asked for
+		// data we knew was already buffered
+		//printf("Read, immediate complete, num_read=%lu\n", num_read);
+		size = num_read;
+	} else {
+		if (GetLastError() == ERROR_IO_PENDING) {
+			if (GetOverlappedResult(port_handle, &ov, &num_read, TRUE)) {
+				//printf("Read, delayed, num_read=%lu\n", num_read);
+				size = num_read;
+			} else {
+				//printf("Read, delayed error\n");
+				size = -1;
+			}
+		} else {
+			//printf("Read, error\n");
+			size = -1;
+		}
+	}
+	CloseHandle(ov.hEvent);
+
+
+
+#endif // defined
+
        std::cout<<"------------------ Size: "<<size<<"\n";
         for(int i=0;i<size;i++)
         {
@@ -453,7 +614,9 @@ namespace BackyardBrains {
 
     int ArduinoSerial::writeToPort(const void *ptr, int len)
     {
+
         int n, written=0;
+        #if defined(__APPLE__) || defined(__linux__)
         fd_set wfds;
         struct timeval tv;
         while (written < len) {
@@ -474,6 +637,37 @@ namespace BackyardBrains {
             }
         }
         return written;
+
+
+
+        #elif defined(_WIN32)
+            DWORD num_written;
+            OVERLAPPED ov;
+            int r;
+            ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+            if (ov.hEvent == NULL) return -1;
+            ov.Internal = ov.InternalHigh = 0;
+            ov.Offset = ov.OffsetHigh = 0;
+            if (WriteFile(port_handle, ptr, len, &num_written, &ov)) {
+                //printf("Write, immediate complete, num_written=%lu\n", num_written);
+                r = num_written;
+            } else {
+                if (GetLastError() == ERROR_IO_PENDING) {
+                    if (GetOverlappedResult(port_handle, &ov, &num_written, TRUE)) {
+                        //printf("Write, delayed, num_written=%lu\n", num_written);
+                        r = num_written;
+                    } else {
+                        //printf("Write, delayed error\n");
+                        r = -1;
+                    }
+                } else {
+                    //printf("Write, error\n");
+                    r = -1;
+                }
+            };
+            CloseHandle(ov.hEvent);
+            return r;
+        #endif
     }
 
 
@@ -640,9 +834,6 @@ static const char *devnames[] = {
 	closedir(dir);
 #elif defined(__APPLE__)
 
-
-
-
     // adapted from SerialPortSample.c, by Apple
     // http://developer.apple.com/samplecode/SerialPortSample/listing2.html
     // and also testserial.c, by Keyspan
@@ -675,7 +866,59 @@ static const char *devnames[] = {
                                      &serialPortIterator) != KERN_SUCCESS) return;
     macos_ports(&serialPortIterator);
     IOObjectRelease(serialPortIterator);
-#endif // MAC OSX
+#elif defined(_WIN32)
+
+// http://msdn.microsoft.com/en-us/library/aa365461(VS.85).aspx
+	// page with 7 ways - not all of them work!
+	// http://www.naughter.com/enumser.html
+	// may be possible to just query the windows registary
+	// http://it.gps678.com/2/ca9c8631868fdd65.html
+	// search in HKEY_LOCAL_MACHINE\HARDWARE\DEVICEMAP\SERIALCOMM
+	// Vista has some special new way, vista-only
+	// http://msdn2.microsoft.com/en-us/library/aa814070(VS.85).aspx
+	char *buffer, *p;
+	//DWORD size = QUERYDOSDEVICE_BUFFER_SIZE;
+	DWORD ret;
+
+	buffer = (char *)malloc(QUERYDOSDEVICE_BUFFER_SIZE);
+	if (buffer == NULL) return;
+	memset(buffer, 0, QUERYDOSDEVICE_BUFFER_SIZE);
+	ret = QueryDosDeviceA(NULL, buffer, QUERYDOSDEVICE_BUFFER_SIZE);
+	if (ret) {
+		printf("Detect Serial using QueryDosDeviceA: ");
+		for (p = buffer; *p; p += strlen(p) + 1) {
+			printf(":  %s", p);
+			if (strncmp(p, "COM", 3)) continue;
+			 std::stringstream sstm;
+            sstm << p << ":";
+			list.push_back(sstm.str().c_str());
+		}
+	} else {
+		char buf[1024];
+		win32_err(buf);
+		printf("QueryDosDeviceA failed, error \"%s\"\n", buf);
+		printf("Detect Serial using brute force GetDefaultCommConfig probing: ");
+		for (int i=1; i<=32; i++) {
+			printf("try  %s", buf);
+			COMMCONFIG cfg;
+			DWORD len;
+			snprintf(buf, sizeof(buf), "COM%d", i);
+			if (GetDefaultCommConfig(buf, &cfg, &len)) {
+				//wxString name;
+				//name.Printf("COM%d:", i);
+                std::stringstream sstm;
+                sstm << "COM" << i;
+                list.push_back(sstm.str().c_str());
+
+				//list.Add(name);
+				printf(":  %s", buf);
+			}
+		}
+	}
+	free(buffer);
+
+
+#endif // defined
 
     list.sort();
     return;
@@ -691,19 +934,20 @@ static const char *devnames[] = {
     // Close the port
     void ArduinoSerial::closeSerial(void)
     {
-        
+
         if(_portOpened)
         {
-    #if defined(__linux__) || defined(__APPLE__)
-            // does this really work properly (and is it thread safe) on Linux??
-            //tcflush(fd, TCIOFLUSH);
-    #endif
-            close(fd);
+            #if defined(__linux__) || defined(__APPLE__)
+                    // does this really work properly (and is it thread safe) on Linux??
+                    //tcflush(fd, TCIOFLUSH);
+
+                    close(fd);
+           #elif defined(_WIN32)
+                    //SetCommConfig(port_handle, &port_cfg_orig, sizeof(COMMCONFIG));
+                    CloseHandle(port_handle);
+            #endif
             _portOpened = false;
-            /*#elif defined(WINDOWS)
-            //SetCommConfig(port_handle, &port_cfg_orig, sizeof(COMMCONFIG));
-            CloseHandle(port_handle);
-            #endif*/
+
         }
     }
 

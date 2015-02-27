@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 	BackyardBrains::Game game;
-	
+
 	game.run();
 	return 0;
 }
